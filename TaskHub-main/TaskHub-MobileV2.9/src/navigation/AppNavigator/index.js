@@ -1,10 +1,12 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { Text } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import WelcomeScreen from '../../screens/Welcome';
 import LoginScreen from '../../screens/Login';
@@ -15,8 +17,7 @@ import CalendarScreen from '../../screens/Calendar';
 import StatsScreen from '../../screens/Stats';
 import ProfileScreen from '../../screens/Profile';
 import SidebarContent from '../../components/Sidebar';
-
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { authService } from '../../services/api';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../styles/theme';
 
@@ -25,10 +26,10 @@ const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 const TAB_ICONS = {
-  [ROUTES.DASHBOARD]: '🏠',
-  [ROUTES.TASKS]: '📋',
-  [ROUTES.CALENDAR]: '📅',
-  [ROUTES.STATS]: '📊',
+  [ROUTES.DASHBOARD]: 'home',
+  [ROUTES.TASKS]: 'check-square',
+  [ROUTES.CALENDAR]: 'calendar',
+  [ROUTES.STATS]: 'bar-chart-2',
 };
 
 function TabNavigator() {
@@ -37,8 +38,8 @@ function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: () => (
-          <Text style={{ fontSize: 22 }}>{TAB_ICONS[route.name]}</Text>
+        tabBarIcon: ({ color }) => (
+          <Feather name={TAB_ICONS[route.name]} size={22} color={color} />
         ),
         tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.secondaryText,
@@ -46,10 +47,7 @@ function TabNavigator() {
           backgroundColor: COLORS.white,
           borderTopColor: COLORS.border,
           height: 72 + bottom,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          paddingBottom: bottom,
           elevation: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
@@ -91,9 +89,6 @@ function DrawerNavigator() {
   );
 }
 
-import { authService } from '../../services/api';
-import { ActivityIndicator, View } from 'react-native';
-
 export default function AppNavigator() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [user, setUser] = React.useState(null);
@@ -107,7 +102,7 @@ export default function AppNavigator() {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
-      console.error('Erro ao verificar sessão:', error);
+      console.error('Erro ao verificar sessao:', error);
     } finally {
       setIsLoading(false);
     }
@@ -123,9 +118,9 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
+      <Stack.Navigator
         screenOptions={{ headerShown: false }}
-        initialRouteName={user ? "App" : ROUTES.WELCOME}
+        initialRouteName={user ? 'App' : ROUTES.WELCOME}
       >
         <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
         <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />

@@ -17,8 +17,30 @@ function Perfil({ darkTheme }) {
     const user = UsuarioService.getCurrentUser();
     if (user) {
       setUserData({ nome: user.nome || '', email: user.email || '', telefone: user.telefone || '' });
+      setProfilePhoto(user.foto || null);
     }
   }, []);
+
+  const updateCurrentUser = (updatedUser) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
+  const saveProfilePhoto = (foto) => {
+    const user = UsuarioService.getCurrentUser();
+    if (!user) return;
+
+    setProfilePhoto(foto);
+    UsuarioService.update(user.id, {
+      nome: userData.nome,
+      email: userData.email,
+      senha: user.senha,
+      foto: foto || ''
+    })
+      .then((response) => {
+        updateCurrentUser({ ...user, ...response.data, telefone: userData.telefone });
+      })
+      .catch(error => alert('Erro ao salvar foto: ' + (error.response?.data?.message || error.message)));
+  };
 
   const handleChangePhoto = () => {
     const input = document.createElement('input');
@@ -28,7 +50,7 @@ function Perfil({ darkTheme }) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (event) => setProfilePhoto(event.target.result);
+        reader.onload = (event) => saveProfilePhoto(event.target.result);
         reader.readAsDataURL(file);
       }
     };
@@ -39,10 +61,10 @@ function Perfil({ darkTheme }) {
   const handleSavePersonalData = () => {
     const user = UsuarioService.getCurrentUser();
     if (user) {
-      UsuarioService.update(user.id, { nome: userData.nome, email: userData.email, senha: user.senha })
-        .then(() => {
+      UsuarioService.update(user.id, { nome: userData.nome, email: userData.email, senha: user.senha, foto: profilePhoto || '' })
+        .then((response) => {
           alert('Dados atualizados com sucesso!');
-          localStorage.setItem('user', JSON.stringify({ ...user, ...userData }));
+          updateCurrentUser({ ...user, ...response.data, ...userData });
         })
         .catch(error => alert('Erro ao atualizar dados: ' + (error.response?.data?.message || error.message)));
     }
@@ -129,7 +151,7 @@ function Perfil({ darkTheme }) {
             <div className="photo-options-overlay" onClick={() => setShowPhotoOptions(false)}>
               <div className="photo-options-menu" onClick={(e) => e.stopPropagation()}>
                 <div className="photo-option" onClick={handleChangePhoto}>Alterar foto</div>
-                <div className="photo-option" onClick={() => { setProfilePhoto(null); setShowPhotoOptions(false); }}>Remover foto</div>
+                <div className="photo-option" onClick={() => { saveProfilePhoto(null); setShowPhotoOptions(false); }}>Remover foto</div>
               </div>
             </div>
           )}

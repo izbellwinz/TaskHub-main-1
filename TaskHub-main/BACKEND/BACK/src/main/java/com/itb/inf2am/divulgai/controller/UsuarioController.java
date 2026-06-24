@@ -1,5 +1,7 @@
 package com.itb.inf2am.divulgai.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +99,9 @@ public class UsuarioController {
             if (!isBlank(password)) {
                 usuarioExistente.setPassword(password);
             }
+            if (dados.containsKey("foto")) {
+                usuarioExistente.setFoto(parseFoto(dados.get("foto")));
+            }
 
             Usuario usuarioAtualizado = usuarioService.save(usuarioExistente);
             return ResponseEntity.ok(toResponse(usuarioAtualizado));
@@ -184,6 +189,7 @@ public class UsuarioController {
         usuario.setUsername(firstNonBlank(dados.get("username"), dados.get("email")));
         usuario.setPassword(firstNonBlank(dados.get("password"), dados.get("senha")));
         usuario.setNivelAcesso(dados.get("nivelAcesso"));
+        usuario.setFoto(parseFoto(dados.get("foto")));
         return usuario;
     }
 
@@ -194,8 +200,38 @@ public class UsuarioController {
                 "username", usuario.getUsername(),
                 "email", usuario.getUsername(),
                 "nivelAcesso", usuario.getNivelAcesso(),
-                "statusUsuario", usuario.getStatusUsuario()
+                "statusUsuario", usuario.getStatusUsuario(),
+                "foto", formatFoto(usuario.getFoto())
         );
+    }
+
+    private byte[] parseFoto(String foto) {
+        if (isBlank(foto)) {
+            return null;
+        }
+
+        if (foto.startsWith("data:image/")) {
+            return foto.getBytes(StandardCharsets.UTF_8);
+        }
+
+        try {
+            return Base64.getDecoder().decode(foto);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private String formatFoto(byte[] foto) {
+        if (foto == null || foto.length == 0) {
+            return "";
+        }
+
+        String fotoComoTexto = new String(foto, StandardCharsets.UTF_8);
+        if (fotoComoTexto.startsWith("data:image/")) {
+            return fotoComoTexto;
+        }
+
+        return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(foto);
     }
 
     private ResponseEntity<Object> badId(String id) {

@@ -1486,6 +1486,7 @@
   background:
     radial-gradient(circle at top left, rgba(77, 110, 245, 0.16), transparent 36%),
     rgba(255, 255, 255, 0.78);
+  min-width: 0;
 }
 
 .agenda-container.dark-theme .details-header {
@@ -1499,6 +1500,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .edit-btn {
@@ -1522,16 +1524,30 @@
 
 .event-title {
   flex: 1;
+  min-width: 0;
   font-size: 26px;
   font-weight: 700;
   color: #111827;
   margin: 0;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .agenda-container.dark-theme .event-title {
   color: #ffffff;
+}
+
+.agenda-container .details-header .event-title {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .agenda-container.dark-theme .event-details .close-btn {

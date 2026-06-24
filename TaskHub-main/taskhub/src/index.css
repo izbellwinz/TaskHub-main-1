@@ -91,45 +91,6 @@
   border-color: var(--border) !important;
 }
 
-/* ── Contato ── */
-.dark-theme .contato {
-  background: var(--bg) !important;
-}
-
-.dark-theme .contact-form {
-  background: var(--bg-card) !important;
-  border-color: var(--border) !important;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-}
-
-.dark-theme .info-item {
-  background: var(--bg-card) !important;
-  border-color: var(--border) !important;
-}
-
-.dark-theme .info-item h3,
-.dark-theme .info-item p {
-  color: var(--text-muted) !important;
-}
-
-.dark-theme .form-input,
-.dark-theme .form-textarea {
-  background: var(--bg-secondary) !important;
-  border-color: var(--border) !important;
-  color: var(--text) !important;
-}
-
-.dark-theme .form-input::placeholder,
-.dark-theme .form-textarea::placeholder {
-  color: var(--text-muted) !important;
-}
-
-.dark-theme .form-input:focus,
-.dark-theme .form-textarea:focus {
-  border-color: var(--accent) !important;
-  background: var(--bg-card) !important;
-}
-
 /* ── Login & Cadastro (já têm fundo escuro, só o card) ── */
 .dark-theme .login-card,
 .dark-theme .cadastro-card {

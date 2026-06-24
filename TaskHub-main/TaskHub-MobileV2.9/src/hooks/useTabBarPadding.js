@@ -1,6 +1,5 @@
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SPACING } from '../styles/theme';
 
 export function useTabBarPadding() {
-  const { bottom } = useSafeAreaInsets();
-  return 72 + bottom;
+  return SPACING.lg;
 }

@@ -1,23 +1,30 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 
 const PRIORITY_CONFIG = {
-  high:   { bg: COLORS.high,    bar: '#F87171', text: COLORS.highText },
-  medium: { bg: COLORS.medium,  bar: '#60A5FA', text: COLORS.mediumText },
-  low:    { bg: COLORS.low,     bar: '#4ADE80', text: COLORS.lowText },
+  high: { bg: COLORS.high, bar: '#F87171', text: COLORS.highText },
+  medium: { bg: COLORS.medium, bar: '#60A5FA', text: COLORS.mediumText },
+  low: { bg: COLORS.low, bar: '#4ADE80', text: COLORS.lowText },
 };
 
-const PRIORITY_LABELS = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+const PRIORITY_LABELS = { high: 'Alta', medium: 'Media', low: 'Baixa' };
 
-export default function TaskCard({ emoji = '📌', title, subtitle, priority = 'medium', color }) {
+export default function TaskCard({ emoji = '•', iconName, title, subtitle, priority = 'medium', color }) {
   const config = PRIORITY_CONFIG[priority] ?? PRIORITY_CONFIG.medium;
   const barColor = color || config.bar;
 
   return (
     <View style={[styles.card, { backgroundColor: config.bg }]}>
       <View style={[styles.bar, { backgroundColor: barColor }]} />
-      <Text style={styles.emoji}>{emoji}</Text>
+      {iconName ? (
+        <View style={styles.iconWrap}>
+          <Feather name={iconName} size={20} color={barColor} />
+        </View>
+      ) : (
+        <Text style={styles.emoji}>{emoji}</Text>
+      )}
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
@@ -43,6 +50,15 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 24,
+    marginHorizontal: SPACING.sm,
+  },
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: SPACING.sm,
   },
   content: {

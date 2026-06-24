@@ -31,7 +31,6 @@ function Navbar({ setCurrentPage }) {
       </div>
       <ul className="nav-links">
         <li><a href="#" onClick={() => setCurrentPage('home')}>Home</a></li>
-        <li><a href="#" onClick={() => setCurrentPage('contato')}>Contato</a></li>
       </ul>
       <div className="navbar-right">
         <button className="sign-in" onClick={() => setCurrentPage('login')}>Entrar</button>

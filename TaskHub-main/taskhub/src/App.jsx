@@ -5,7 +5,6 @@ import Home from "./pages/Home.jsx";
 import Agenda from "./pages/Agenda.jsx";
 import Login from "./pages/Login.jsx";
 import Cadastro from "./pages/Cadastro.jsx";
-import Contato from "./pages/Contato.jsx";
 import Sobre from "./pages/Sobre.jsx";
 import Perfil from "./pages/Perfil.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -38,7 +37,6 @@ function App() {
       case 'agenda': return <Agenda darkTheme={darkTheme} setDarkTheme={setDarkTheme}/>;
       case 'login': return <Login setCurrentPage={setCurrentPage} darkTheme={darkTheme}/>;
       case 'cadastro': return <Cadastro setCurrentPage={setCurrentPage} darkTheme={darkTheme}/>;
-      case 'contato': return <Contato darkTheme={darkTheme}/>;
       case 'sobre': return <Sobre darkTheme={darkTheme}/>;
       case 'perfil': return <Perfil darkTheme={darkTheme} setDarkTheme={setDarkTheme}/>;
       case 'dashboard': return <Dashboard darkTheme={darkTheme} setDarkTheme={setDarkTheme}/>;

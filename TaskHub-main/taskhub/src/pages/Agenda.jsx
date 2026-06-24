@@ -6,6 +6,15 @@ import UsuarioService from '../services/UsuarioService';
 function Agenda({ darkTheme }) {
   const [events, setEvents] = useState([]);
 
+  const inferImageMimeType = (base64) => {
+    if (!base64) return 'image/jpeg';
+    if (base64.startsWith('iVBORw0KGgo')) return 'image/png';
+    if (base64.startsWith('/9j/')) return 'image/jpeg';
+    if (base64.startsWith('R0lGOD')) return 'image/gif';
+    if (base64.startsWith('UklGR')) return 'image/webp';
+    return 'image/jpeg';
+  };
+
   useEffect(() => {
     const user = UsuarioService.getCurrentUser();
     if (user) {
@@ -20,7 +29,7 @@ function Agenda({ darkTheme }) {
             color: a.cor || '#1a73e8',
             icon: '',
             checklist: [],
-            image: null,
+            image: a.arquivo ? `data:${inferImageMimeType(a.arquivo)};base64,${a.arquivo}` : null,
             statusAgenda: a.statusAgenda,
           }));
           setEvents(mapped);
@@ -79,6 +88,7 @@ function Agenda({ darkTheme }) {
         descricao: eventForm.description,
         statusAgenda: 'ativo',
         cor: eventForm.color || '#1a73e8',
+        arquivo: eventForm.image ? eventForm.image.split(',')[1] : null,
       };
 
       if (eventForm.id) {
@@ -89,7 +99,8 @@ function Agenda({ darkTheme }) {
               ...eventForm,
               id: response.data.id,
               date: response.data.dataAgenda,
-              time: response.data.hora
+              time: response.data.hora,
+              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
             };
             setEvents(events.map(e => e.id === eventForm.id ? updatedEvent : e));
             setShowModal(false);
@@ -106,7 +117,8 @@ function Agenda({ darkTheme }) {
               ...eventForm,
               id: response.data.id,
               date: response.data.dataAgenda,
-              time: response.data.hora
+              time: response.data.hora,
+              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
             };
             setEvents([...events, newEvent]);
             setShowModal(false);
@@ -145,7 +157,8 @@ function Agenda({ darkTheme }) {
         hora: eventToUpdate.time.length === 5 ? `${eventToUpdate.time}:00` : eventToUpdate.time,
         descricao: eventToUpdate.description,
         statusAgenda: eventToUpdate.statusAgenda || 'ativo',
-        cor: color
+        cor: color,
+        arquivo: eventToUpdate.image ? eventToUpdate.image.split(',')[1] : null
       };
 
       AgendaService.update(eventId, data)

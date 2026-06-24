@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { authService } from '../../services/api';
 import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '../../styles/theme';
 
 const MENU_ITEMS = [
@@ -17,12 +18,21 @@ const MENU_ITEMS = [
 ];
 
 export default function SidebarContent({ navigation }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    authService.getCurrentUser().then(setUser);
+  }, []);
+
+  const userName = user?.nome || user?.name || 'Usuario';
+  const userEmail = user?.email || user?.username || 'E-mail nao disponivel';
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profile}>
         <View style={styles.avatar} />
-        <Text style={styles.name}>Victor</Text>
-        <Text style={styles.email}>victor@email.com</Text>
+        <Text style={styles.name}>{userName}</Text>
+        <Text style={styles.email}>{userEmail}</Text>
       </View>
 
       <View style={styles.divider} />

@@ -70,6 +70,27 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
     handleThemeChange(!darkTheme);
   };
 
+  const saveConfiguracao = (changes) => {
+    const user = UsuarioService.getCurrentUser();
+    if (!user) return;
+
+    const updated = {
+      ...(configuracao || {}),
+      ...changes,
+      usuarioId: configuracao?.usuarioId || user.id,
+      formatoHora: configuracao?.formatoHora || '24'
+    };
+
+    setConfiguracao(updated);
+    if (configuracao?.id) {
+      ConfiguracaoService.update(configuracao.id, updated)
+        .then(r => setConfiguracao(r.data));
+    } else {
+      ConfiguracaoService.create(updated)
+        .then(r => setConfiguracao(r.data));
+    }
+  };
+
   const formatDate = (dateStr) => {
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${year}`;
@@ -139,12 +160,12 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
             <div className="events-list">
               {getTodayEvents().length > 0 ? (
                 getTodayEvents().map(event => (
-                  <div key={event.id} className="event-card" style={{ borderLeftColor: event.cor || '#1a73e8' }}>
-                    <div className="event-info">
-                      <div className="event-title">
+                  <div key={event.id} className="dashboard-event-card" style={{ borderLeftColor: event.cor || '#1a73e8' }}>
+                    <div className="dashboard-event-info">
+                      <div className="dashboard-event-title">
                         {event.titulo}
                       </div>
-                      <div className="event-time">{event.hora}</div>
+                      <div className="dashboard-event-time">{event.hora}</div>
                     </div>
                   </div>
                 ))
@@ -159,14 +180,14 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
             <div className="events-list">
               {getUpcomingEvents().length > 0 ? (
                 getUpcomingEvents().map(event => (
-                  <div key={event.id} className="event-card" style={{ borderLeftColor: event.cor || '#1a73e8' }}>
-                    <div className="event-info">
-                      <div className="event-title">
+                  <div key={event.id} className="dashboard-event-card" style={{ borderLeftColor: event.cor || '#1a73e8' }}>
+                    <div className="dashboard-event-info">
+                      <div className="dashboard-event-title">
                         {event.titulo}
                       </div>
-                      <div className="event-details">
-                        <span className="event-date">{formatDate(event.dataAgenda)}</span>
-                        <span className="event-time">{event.hora}</span>
+                      <div className="dashboard-event-meta">
+                        <span className="dashboard-event-date">{formatDate(event.dataAgenda)}</span>
+                        <span className="dashboard-event-time">{event.hora}</span>
                       </div>
                     </div>
                   </div>
@@ -197,48 +218,6 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
               <div className="settings-section">
                 <h3>Preferências</h3>
                 <div className="setting-item">
-                  <label>Primeiro dia da semana:</label>
-                  <select
-                    className="setting-select"
-                    value={configuracao?.primeiroDiaSemana || 'Domingo'}
-                    onChange={(e) => {
-                      const updated = { ...configuracao, primeiroDiaSemana: e.target.value };
-                      setConfiguracao(updated);
-                      const user = UsuarioService.getCurrentUser();
-                      if (configuracao?.id) {
-                        ConfiguracaoService.update(configuracao.id, updated);
-                      } else {
-                        ConfiguracaoService.create({ ...updated, usuarioId: user.id, formatoHora: updated.formatoHora || '24' })
-                          .then(r => setConfiguracao(r.data));
-                      }
-                    }}
-                  >
-                    <option value="Domingo">Domingo</option>
-                    <option value="Segunda-feira">Segunda-feira</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <label>Formato de hora:</label>
-                  <select
-                    className="setting-select"
-                    value={configuracao?.formatoHora || '24'}
-                    onChange={(e) => {
-                      const updated = { ...configuracao, formatoHora: e.target.value };
-                      setConfiguracao(updated);
-                      const user = UsuarioService.getCurrentUser();
-                      if (configuracao?.id) {
-                        ConfiguracaoService.update(configuracao.id, updated);
-                      } else {
-                        ConfiguracaoService.create({ ...updated, usuarioId: user.id })
-                          .then(r => setConfiguracao(r.data));
-                      }
-                    }}
-                  >
-                    <option value="24">24 horas</option>
-                    <option value="12">12 horas (AM/PM)</option>
-                  </select>
-                </div>
-                <div className="setting-item">
                   <label>Tema:</label>
                   <select
                     className="setting-select"
@@ -246,15 +225,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
                     onChange={(e) => {
                       const isDark = e.target.value === 'dark';
                       handleThemeChange(isDark);
-                      const updated = { ...configuracao, tema: e.target.value };
-                      setConfiguracao(updated);
-                      const user = UsuarioService.getCurrentUser();
-                      if (configuracao?.id) {
-                        ConfiguracaoService.update(configuracao.id, updated);
-                      } else {
-                        ConfiguracaoService.create({ ...updated, usuarioId: user.id, formatoHora: updated.formatoHora || '24' })
-                          .then(r => setConfiguracao(r.data));
-                      }
+                      saveConfiguracao({ tema: e.target.value });
                     }}
                   >
                     <option value="light">Claro</option>
@@ -271,15 +242,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
                     type="checkbox"
                     checked={configuracao?.mostrarEmail || false}
                     onChange={(e) => {
-                      const updated = { ...configuracao, mostrarEmail: e.target.checked };
-                      setConfiguracao(updated);
-                      const user = UsuarioService.getCurrentUser();
-                      if (configuracao?.id) {
-                        ConfiguracaoService.update(configuracao.id, updated);
-                      } else {
-                        ConfiguracaoService.create({ ...updated, usuarioId: user.id, formatoHora: updated.formatoHora || '24' })
-                          .then(r => setConfiguracao(r.data));
-                      }
+                      saveConfiguracao({ mostrarEmail: e.target.checked });
                     }}
                   />
                 </div>
@@ -289,15 +252,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
                     type="checkbox"
                     checked={configuracao?.receberEmail !== false}
                     onChange={(e) => {
-                      const updated = { ...configuracao, receberEmail: e.target.checked };
-                      setConfiguracao(updated);
-                      const user = UsuarioService.getCurrentUser();
-                      if (configuracao?.id) {
-                        ConfiguracaoService.update(configuracao.id, updated);
-                      } else {
-                        ConfiguracaoService.create({ ...updated, usuarioId: user.id, formatoHora: updated.formatoHora || '24' })
-                          .then(r => setConfiguracao(r.data));
-                      }
+                      saveConfiguracao({ receberEmail: e.target.checked });
                     }}
                   />
                 </div>
