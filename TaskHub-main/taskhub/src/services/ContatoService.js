@@ -1,0 +1,32 @@
+import http from '../common/http-common';
+const API_URL = "/api/v1/contatos";
+
+const findAll = () => {
+    return http.mainInstance.get(API_URL);
+};
+
+const findById = (id) => {
+    return http.mainInstance.get(API_URL + `/${id}`);
+};
+
+const findByUsuarioId = (usuarioId) => {
+    return http.mainInstance.get(API_URL + `/usuario/${usuarioId}`);
+};
+
+const create = (data) => {
+    return http.mainInstance.post(API_URL, data);
+};
+
+const remove = (id) => {
+    return http.mainInstance.delete(API_URL + `/${id}`);
+};
+
+const ContatoService = {
+    findAll,
+    findById,
+    findByUsuarioId,
+    create,
+    remove,
+};
+
+export default ContatoService;

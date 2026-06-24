@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Conexão TaskHub</title>
+</head>
+<body>
+    <h1>Teste de Conexão TaskHub</h1>
+    
+    <h2>Cadastro</h2>
+    <form id="cadastroForm">
+        <input type="text" id="nome" placeholder="Nome" required><br><br>
+        <input type="email" id="email" placeholder="Email" required><br><br>
+        <input type="password" id="senha" placeholder="Senha" required><br><br>
+        <button type="submit">Cadastrar</button>
+    </form>
+    
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required><br><br>
+        <input type="password" id="loginSenha" placeholder="Senha" required><br><br>
+        <button type="submit">Login</button>
+    </form>
+    
+    <h2>Usuários</h2>
+    <button onclick="listarUsuarios()">Listar Usuários</button>
+    <div id="usuarios"></div>
+
+    <script>
+        // Cadastro
+        document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            
+            try {
+                const response = await fetch('http://localhost:9090/api/v1/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    alert('✅ Cadastro realizado! ID: ' + user.id);
+                    document.getElementById('cadastroForm').reset();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erro: ' + error.message);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão: ' + error.message);
+            }
+        });
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginSenha').value;
+            
+            try {
+                const response = await fetch('http://localhost:9090/api/v1/usuarios/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    alert('✅ Login realizado! Bem-vindo, ' + user.nome);
+                    document.getElementById('loginForm').reset();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erro: ' + error.message);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão: ' + error.message);
+            }
+        });
+        
+        // Listar usuários
+        async function listarUsuarios() {
+            try {
+                const response = await fetch('http://localhost:9090/api/v1/usuarios');
+                const usuarios = await response.json();
+                document.getElementById('usuarios').innerHTML = 
+                    '<pre>' + JSON.stringify(usuarios, null, 2) + '</pre>';
+            } catch (error) {
+                alert('❌ Erro: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

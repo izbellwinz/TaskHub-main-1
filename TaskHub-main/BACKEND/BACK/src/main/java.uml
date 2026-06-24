@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>Z:/LIP1/TCC/divulgaijava/src/main/java</OriginalElement>
+  <nodes>
+    <node x="1367.707087679106" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.CategoriaRepository</node>
+    <node x="1377.707087679106" y="851.7734497721216">com.itb.inf2am.divulgai.model.entity.Categoria</node>
+    <node x="1131.8514258608293" y="851.7734497721215">com.itb.inf2am.divulgai.model.entity.Contato</node>
+    <node x="143.8184839728384" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.UsuarioRepository</node>
+    <node x="384.12209733578175" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.ServicoController</node>
+    <node x="392.48085805478473" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.ServicoRepository</node>
+    <node x="887.4957640425528" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.RegiaoController</node>
+    <node x="-170.985129390105" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.PrestadorRepository</node>
+    <node x="109.81848397283841" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.UsuarioController</node>
+    <node x="109.81848397283841" y="850.4771269775756">com.itb.inf2am.divulgai.model.entity.Usuario</node>
+    <node x="1113.8514258608293" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.ContatoRepository</node>
+    <node x="1369.707087679106" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.CategoriaController</node>
+    <node x="608.0134389691677" y="628.4867539133986">com.itb.inf2am.divulgai.DivulgaiApplication</node>
+    <node x="882.5939728669454" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.RegiaoRepository</node>
+    <node x="616.088053768943" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.FeedbackController</node>
+    <node x="1124.8514258608293" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.ContatoController</node>
+    <node x="619.4257106987252" y="850.4771269775756">com.itb.inf2am.divulgai.model.entity.Feedback</node>
+    <node x="390.6220973357818" y="850.4771269775756">com.itb.inf2am.divulgai.model.entity.Servico</node>
+    <node x="628.4257106987252" y="769.4819404454871">com.itb.inf2am.divulgai.model.repository.FeedbackRepository</node>
+    <node x="-158.57355937039978" y="1664.9924626476684">com.itb.inf2am.divulgai.controller.PrestadorController</node>
+    <node x="893.9957640425527" y="851.7734497721215">com.itb.inf2am.divulgai.model.entity.Regiao</node>
+    <node x="-188.985129390105" y="850.4771269775756">com.itb.inf2am.divulgai.model.entity.Prestador</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.itb.inf2am.divulgai.controller.CategoriaController" target="com.itb.inf2am.divulgai.model.entity.Categoria" relationship="CREATE">
+      <point x="94.5" y="-44.0" />
+      <point x="1566.207087679106" y="1227.158642843674" />
+      <point x="1450.5657732995344" y="1227.158642843674" />
+      <point x="-21.141314379571668" y="128.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.FeedbackController" target="com.itb.inf2am.divulgai.model.entity.Feedback" relationship="TO_MANY">
+      <point x="14.337656929782156" y="-44.0" />
+      <point x="0.0" y="128.5000000000001" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.ServicoController" target="com.itb.inf2am.divulgai.model.entity.Servico" relationship="CREATE">
+      <point x="-22.70451011287537" y="-44.0" />
+      <point x="454.9175872229064" y="1155.4771269775756" />
+      <point x="0.0" y="152.5000000000001" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.ContatoController" target="com.itb.inf2am.divulgai.model.entity.Contato" relationship="TO_MANY">
+      <point x="5.579279630650262" y="-44.0" />
+      <point x="1226.4307054914796" y="1246.8620794260491" />
+      <point x="1139.3514258608293" y="1246.8620794260491" />
+      <point x="-81.5" y="128.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.RegiaoController" target="com.itb.inf2am.divulgai.model.entity.Regiao" relationship="TO_MANY">
+      <point x="57.737709684852916" y="-44.0" />
+      <point x="922.0475691769061" y="1664.9924626476684" />
+      <point x="922.0475691769061" y="1216.7309548387511" />
+      <point x="935.4441547195783" y="1216.7309548387511" />
+      <point x="935.4441547195783" y="1210.7522023054362" />
+      <point x="978.9957640425527" y="1210.7522023054362" />
+      <point x="0.0" y="176.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.FeedbackController" target="com.itb.inf2am.divulgai.model.entity.Feedback" relationship="CREATE">
+      <point x="29.337656929782156" y="-44.0" />
+      <point x="15.0" y="128.5000000000001" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.UsuarioController" target="com.itb.inf2am.divulgai.model.entity.Usuario" relationship="CREATE">
+      <point x="76.49838617144565" y="-34.04018739794583" />
+      <point x="280.81687014428405" y="1299.4771269775756" />
+      <point x="80.14059553732852" y="224.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.ServicoController" target="com.itb.inf2am.divulgai.model.entity.Servico" relationship="TO_MANY">
+      <point x="0.0" y="-44.0" />
+      <point x="540.0460706987117" y="1664.9924626476684" />
+      <point x="540.0460706987117" y="1135.8345459759144" />
+      <point x="500.32660744865717" y="1135.8345459759144" />
+      <point x="22.70451011287537" y="152.5000000000001" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.UsuarioController" target="com.itb.inf2am.divulgai.model.entity.Usuario" relationship="TO_MANY">
+      <point x="-80.14059553732852" y="-44.0" />
+      <point x="124.17788843550989" y="1315.1858442879" />
+      <point x="125.48279689234175" y="1315.1858442879" />
+      <point x="-97.33568708049665" y="222.5278674730348" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.ContatoController" target="com.itb.inf2am.divulgai.model.entity.Contato" relationship="CREATE">
+      <point x="87.07927963065026" y="-44.0" />
+      <point x="1307.9307054914796" y="1246.8620794260491" />
+      <point x="1220.8514258608293" y="1246.8620794260491" />
+      <point x="0.0" y="128.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.RegiaoController" target="com.itb.inf2am.divulgai.model.entity.Regiao" relationship="CREATE">
+      <point x="72.73770968485292" y="-44.0" />
+      <point x="1051.7334737274057" y="1482.7129764764131" />
+      <point x="1025.706837149815" y="1482.7129764764131" />
+      <point x="1025.706837149815" y="1265.5922028467783" />
+      <point x="1025.7068371498149" y="1265.5922028467783" />
+      <point x="1025.7068371498149" y="1216.7309548387511" />
+      <point x="993.9957640425527" y="1216.7309548387511" />
+      <point x="15.0" y="176.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.CategoriaController" target="com.itb.inf2am.divulgai.model.entity.Categoria" relationship="TO_MANY">
+      <point x="29.141314379571668" y="-44.0" />
+      <point x="1500.8484020586777" y="1638.7603822672306" />
+      <point x="1403.5831412373682" y="1638.7603822672306" />
+      <point x="1403.5831412373682" y="1144.7385213356447" />
+      <point x="1385.207087679106" y="1144.7385213356447" />
+      <point x="-86.5" y="128.5" />
+    </edge>
+    <edge source="com.itb.inf2am.divulgai.controller.PrestadorController" target="com.itb.inf2am.divulgai.model.entity.Prestador" relationship="TO_MANY">
+      <point x="-102.0" y="0.0" />
+      <point x="-66.98512939010499" y="1708.9924626476684" />
+      <point x="0.0" y="368.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="0.6888379204892966" showDependencies="true" x="794.0" y="1230.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

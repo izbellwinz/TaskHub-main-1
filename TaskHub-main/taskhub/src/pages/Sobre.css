@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+.sobre {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: 'Inter', sans-serif;
+}
+
+.sobre-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.sobre-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.sobre-header h1 {
+  font-size: 36px;
+  font-weight: 400;
+  color: #3c4043;
+  margin: 0 0 16px 0;
+}
+
+.sobre-header p {
+  font-size: 18px;
+  color: #5f6368;
+  margin: 0;
+}
+
+.recursos-section {
+  margin-bottom: 64px;
+}
+
+.recursos-section h2 {
+  font-size: 24px;
+  font-weight: 500;
+  color: #3c4043;
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.recursos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.recurso-centered {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.recurso-item {
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.recurso-item h3 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #3c4043;
+  margin: 0 0 12px 0;
+}
+
+.recurso-item p {
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.diferenciais-section h2 {
+  font-size: 24px;
+  font-weight: 500;
+  color: #3c4043;
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.diferenciais-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.diferencial-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.diferencial-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #75b1ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.diferencial-content h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #3c4043;
+  margin: 0 0 8px 0;
+}
+
+.diferencial-content p {
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .sobre-container {
+    padding: 32px 16px;
+  }
+  
+  .sobre-header {
+    margin-bottom: 48px;
+  }
+  
+  .sobre-header h1 {
+    font-size: 28px;
+  }
+  
+  .recursos-section {
+    margin-bottom: 48px;
+  }
+  
+  .recursos-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .recurso-centered {
+    max-width: none;
+  }
+  
+  .recurso-item {
+    padding: 24px;
+  }
+  
+  .diferencial-item {
+    padding: 20px;
+  }
+}

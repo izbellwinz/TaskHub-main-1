@@ -1,0 +1,89 @@
+PORTA DO BACK: 9090
+PORTA DO FRONT: 5173
+
+END points do back:
+
+BASE URL: http://localhost:9090
+
+--- USUARIOS ---
+GET    /api/v1/usuarios
+GET    /api/v1/usuarios/{id}
+POST   /api/v1/usuarios
+POST   /api/v1/usuarios/login
+PUT    /api/v1/usuarios/{id}
+PUT    /api/v1/usuarios/alterarSenha/{id}?senha=novaSenha
+PUT    /api/v1/usuarios/inativar/{id}
+PUT    /api/v1/usuarios/reativar/{id}
+DELETE /api/v1/usuarios/{id}
+
+--- AGENDAS ---
+GET    /api/v1/agendas
+GET    /api/v1/agendas/{id}
+GET    /api/v1/agendas/usuario/{usuarioId}
+POST   /api/v1/agendas
+PUT    /api/v1/agendas/{id}
+DELETE /api/v1/agendas/{id}
+
+--- TAREFAS ---
+GET    /api/v1/tarefas
+GET    /api/v1/tarefas/{id}
+GET    /api/v1/tarefas/agenda/{agendaId}
+POST   /api/v1/tarefas
+PUT    /api/v1/tarefas/{id}
+DELETE /api/v1/tarefas/{id}
+
+--- NOTIFICACOES ---
+GET    /api/v1/notificacoes
+GET    /api/v1/notificacoes/{id}
+GET    /api/v1/notificacoes/usuario/{usuarioId}
+POST   /api/v1/notificacoes
+PUT    /api/v1/notificacoes/{id}
+DELETE /api/v1/notificacoes/{id}obg
+
+--- CONFIGURACOES ---
+GET    /api/v1/configuracoes
+GET    /api/v1/configuracoes/{id}
+GET    /api/v1/configuracoes/usuario/{usuarioId}
+POST   /api/v1/configuracoes
+PUT    /api/v1/configuracoes/{id}
+DELETE /api/v1/configuracoes/{id}
+
+--- CONTATOS ---
+GET    /api/v1/contatos
+GET    /api/v1/contatos/{id}
+GET    /api/v1/contatos/usuario/{usuarioId}
+POST   /api/v1/contatos
+DELETE /api/v1/contatos/{id}
+
+--- EXEMPLOS DE BODY ---
+
+Cadastrar usuario:
+{
+  "nome": "Maria Silva",
+  "email": "maria@email.com",
+  "senha": "123456"
+}
+
+Login:
+{
+  "email": "maria@email.com",
+  "senha": "123456"
+}
+
+Criar agenda:
+{
+  "usuarioId": 1,
+  "titulo": "Reuniao",
+  "dataAgenda": "2025-07-25",
+  "hora": "14:00:00",
+  "descricao": "Reuniao de equipe",
+  "statusAgenda": "ativo"
+}
+
+Criar tarefa:
+{
+  "agendaId": 1,
+  "descricao": "Preparar apresentacao",
+  "statusTarefa": "pendente",
+  "dataVencimento": "2025-07-25T14:00:00"
+}
