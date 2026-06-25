@@ -4,7 +4,7 @@ import UsuarioService from '../services/UsuarioService';
 
 function Login({ setCurrentPage, darkTheme }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [forgotStep, setForgotStep] = useState(null); // null | 'email' | 'senha'
+  const [forgotStep, setForgotStep] = useState(null);
   const [forgotEmail, setForgotEmail] = useState('');
   const [newPassData, setNewPassData] = useState({ novaSenha: '', confirmarSenha: '' });
   const [forgotMsg, setForgotMsg] = useState('');
@@ -14,7 +14,7 @@ function Login({ setCurrentPage, darkTheme }) {
     UsuarioService.login(formData.email, formData.password).then(
       () => setCurrentPage('dashboard'),
       (error) => {
-        const respMessage = (error.response?.data?.message) || error.message || error.toString();
+        const respMessage = error.response?.data?.message || error.message || error.toString();
         alert('Erro no login: ' + respMessage);
       }
     );
@@ -23,21 +23,23 @@ function Login({ setCurrentPage, darkTheme }) {
   const handleForgotEmail = (e) => {
     e.preventDefault();
     setForgotMsg('');
-    UsuarioService.findAll().then((res) => {
-      const existe = res.data.some(u => u.email === forgotEmail);
-      if (!existe) {
-        setForgotMsg('Email não encontrado.');
-      } else {
-        setForgotStep('senha');
-      }
-    }).catch(() => setForgotMsg('Erro ao verificar email.'));
+    UsuarioService.findAll()
+      .then((res) => {
+        const existe = res.data.some((u) => u.email === forgotEmail);
+        if (!existe) {
+          setForgotMsg('Email nao encontrado.');
+        } else {
+          setForgotStep('senha');
+        }
+      })
+      .catch(() => setForgotMsg('Erro ao verificar email.'));
   };
 
   const handleResetSenha = (e) => {
     e.preventDefault();
     setForgotMsg('');
     if (newPassData.novaSenha !== newPassData.confirmarSenha) {
-      setForgotMsg('As senhas não coincidem.');
+      setForgotMsg('As senhas nao coincidem.');
       return;
     }
     if (newPassData.novaSenha.length < 6) {
@@ -49,7 +51,7 @@ function Login({ setCurrentPage, darkTheme }) {
         setForgotStep(null);
         setForgotEmail('');
         setNewPassData({ novaSenha: '', confirmarSenha: '' });
-        alert('Senha redefinida com sucesso! Faça login.');
+        alert('Senha redefinida com sucesso! Faca login.');
       })
       .catch((error) => {
         setForgotMsg(error.response?.data?.message || 'Erro ao redefinir senha.');
@@ -63,116 +65,161 @@ function Login({ setCurrentPage, darkTheme }) {
     setForgotMsg('');
   };
 
-
   return (
-    <div className={`login-container ${darkTheme ? 'dark-theme' : ''}`}>
-      <div className="login-card">
-        <div className="login-logo">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <rect x="2" y="6" width="24" height="22" rx="4" fill="#0d1b5e" stroke="#1a237e" strokeWidth="1.2"/>
-            <rect x="2" y="6" width="24" height="9" rx="4" fill="#0d1b5e"/>
-            <rect x="2" y="11" width="24" height="4" fill="#0d1b5e"/>
-            <rect x="4" y="14" width="20" height="13" rx="2" fill="white"/>
-            <rect x="9" y="3" width="4" height="7" rx="2" fill="white" stroke="#1a237e" strokeWidth="1"/>
-            <rect x="15" y="3" width="4" height="7" rx="2" fill="white" stroke="#1a237e" strokeWidth="1"/>
-            <rect x="6" y="16" width="4" height="3.5" rx="0.8" fill="#3949ab"/>
-            <rect x="11" y="16" width="4" height="3.5" rx="0.8" fill="#0d1b5e" opacity="0.6"/>
-            <rect x="6" y="20.5" width="4" height="3.5" rx="0.8" fill="#0d1b5e" opacity="0.6"/>
-            <rect x="11" y="20.5" width="4" height="3.5" rx="0.8" fill="#3949ab"/>
-            <circle cx="26" cy="26" r="8" fill="white" stroke="#0d1b5e" strokeWidth="2.2"/>
-            <circle cx="26" cy="26" r="5.5" fill="white"/>
-            <polyline points="22.5,26 25,28.5 29.5,22.5" stroke="#0d1b5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <line x1="32" y1="32" x2="34" y2="34" stroke="#0d1b5e" strokeWidth="3" strokeLinecap="round"/>
-          </svg>
-          <span>TaskHub</span>
-        </div>
-        <div className="login-header">
-          <h1>Entrar com Email</h1>
-          <p>Digite suas credenciais para acessar</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Senha</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-            />
-          </div>
-
-          <button type="submit" className="login-btn">Entrar</button>
-        </form>
-
-        <div className="login-footer">
-          <p>
-            <span className="link" onClick={() => setForgotStep('email')}>Esqueci a senha</span>
+    <div className={`login-page ${darkTheme ? 'dark-theme' : ''}`}>
+      <header className="login-site-header">
+        <nav className="login-nav">
+          <button className="login-logo" type="button" onClick={() => setCurrentPage('home')}>
+            <span className="login-logo-mark" aria-hidden="true"></span>
+            Taskhub
+          </button>
+          <p className="login-nav-aux">
+            Ainda não tem conta?{' '}
+            <button type="button" onClick={() => setCurrentPage('cadastro')}>
+              Criar conta
+            </button>
           </p>
-          <p>Não tem uma conta? <span className="link" onClick={() => setCurrentPage('cadastro')}>Cadastre-se</span></p>
+        </nav>
+      </header>
+
+      <main className="login-main">
+        <div className="login-auth-layout">
+          <aside className="login-auth-panel">
+            <div className="login-auth-panel-top">
+              <div className="login-logo login-logo-panel">
+                <span className="login-logo-mark" aria-hidden="true"></span>
+                Taskhub
+              </div>
+              <h2>
+                Bem-vindo de <em>volta.</em>
+              </h2>
+              <p>Sua agenda continua exatamente onde voce deixou - organizada, clara e pronta para o seu dia.</p>
+            </div>
+
+            <div className="login-auth-panel-quote">
+              
+            </div>
+          </aside>
+
+          <section className="login-auth-form-wrap">
+            <div className="login-auth-heading">
+            
+              
+              <h1>Entre na sua conta</h1>
+              <p>Use seu e-mail e senha para continuar.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="login-form">
+
+
+              <div className="login-field">
+                <label htmlFor="login-email">E-mail</label>
+                <input
+                  type="email"
+                  id="login-email"
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="login-field">
+                <div className="login-field-row">
+                  <label htmlFor="login-senha">Senha</label>
+                  <button className="login-forgot-link" type="button" onClick={() => setForgotStep('email')}>
+                    Esqueci a senha
+                  </button>
+                </div>
+                <input
+                  type="password"
+                  id="login-senha"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+
+              <button className="login-btn login-btn-primary login-btn-full" type="submit">
+                Entrar
+              </button>
+
+              <p className="login-auth-footer-note">
+                Não tem conta?{' '}
+                <button type="button" onClick={() => setCurrentPage('cadastro')}>
+                  Criar conta
+                </button>
+              </p>
+            </form>
+          </section>
         </div>
-      </div>
+      </main>
+
+      <footer className="login-site-footer">
+        <div className="login-footer-bottom">
+          <span>© 2026 Taskhub</span>
+          <a href="#">Privacidade</a>
+          <a href="#">Termos de uso</a>
+          <a href="#">Suporte</a>
+        </div>
+      </footer>
 
       {forgotStep && (
-        <div className="forgot-overlay" onClick={closeForgot}>
-          <div className="forgot-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="forgot-close" onClick={closeForgot}>✕</button>
+        <div className="login-forgot-overlay" onClick={closeForgot}>
+          <div className="login-forgot-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="login-forgot-close" type="button" onClick={closeForgot}>×</button>
 
             {forgotStep === 'email' && (
               <>
-                <h2>Redefinir Senha</h2>
-                <p>Digite o email cadastrado na sua conta.</p>
-                <form onSubmit={handleForgotEmail}>
-                  <div className="form-group">
-                    <label>Email</label>
+                <h2>Redefinir senha</h2>
+                <p>Digite o e-mail cadastrado na sua conta.</p>
+                <form onSubmit={handleForgotEmail} className="login-modal-form">
+                  <div className="login-field">
+                    <label htmlFor="forgot-email">E-mail</label>
                     <input
                       type="email"
+                      id="forgot-email"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       required
                     />
                   </div>
-                  {forgotMsg && <p className="forgot-error">{forgotMsg}</p>}
-                  <button type="submit" className="login-btn">Continuar</button>
+                  {forgotMsg && <p className="login-forgot-error">{forgotMsg}</p>}
+                  <button type="submit" className="login-btn login-btn-primary login-btn-full">Continuar</button>
                 </form>
               </>
             )}
 
             {forgotStep === 'senha' && (
               <>
-                <h2>Nova Senha</h2>
-                <p>Defina uma nova senha para <strong>{forgotEmail}</strong></p>
-                <form onSubmit={handleResetSenha}>
-                  <div className="form-group">
-                    <label>Nova Senha</label>
+                <h2>Nova senha</h2>
+                <p>Defina uma nova senha para <strong>{forgotEmail}</strong>.</p>
+                <form onSubmit={handleResetSenha} className="login-modal-form">
+                  <div className="login-field">
+                    <label htmlFor="nova-senha">Nova senha</label>
                     <input
                       type="password"
+                      id="nova-senha"
                       value={newPassData.novaSenha}
                       onChange={(e) => setNewPassData({ ...newPassData, novaSenha: e.target.value })}
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Confirmar Senha</label>
+                  <div className="login-field">
+                    <label htmlFor="confirmar-senha">Confirmar senha</label>
                     <input
                       type="password"
+                      id="confirmar-senha"
                       value={newPassData.confirmarSenha}
                       onChange={(e) => setNewPassData({ ...newPassData, confirmarSenha: e.target.value })}
                       required
                     />
                   </div>
-                  {forgotMsg && <p className="forgot-error">{forgotMsg}</p>}
-                  <button type="submit" className="login-btn">Redefinir Senha</button>
+                  {forgotMsg && <p className="login-forgot-error">{forgotMsg}</p>}
+                  <button type="submit" className="login-btn login-btn-primary login-btn-full">Redefinir senha</button>
                 </form>
               </>
             )}
