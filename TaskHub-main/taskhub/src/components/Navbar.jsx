@@ -29,9 +29,6 @@ function Navbar({ setCurrentPage }) {
         </svg>
         <span>TaskHub</span>
       </div>
-      <ul className="nav-links">
-        <li><a href="#" onClick={() => setCurrentPage('home')}>Home</a></li>
-      </ul>
       <div className="navbar-right">
         <button className="sign-in" onClick={() => setCurrentPage('login')}>Entrar</button>
       </div>
