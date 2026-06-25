@@ -34,7 +34,7 @@ function Agenda({ darkTheme }) {
     date: agenda.dataAgenda,
     time: agenda.hora,
     description: agenda.descricao,
-    color: agenda.cor || '#1a73e8',
+    color: agenda.cor || '#00193a',
     icon: '',
     checklist,
     image: agenda.arquivo ? `data:${inferImageMimeType(agenda.arquivo)};base64,${agenda.arquivo}` : null,
@@ -190,11 +190,34 @@ function Agenda({ darkTheme }) {
     setContextMenu({ show: true, x: e.clientX, y: e.clientY, eventId });
   };
 
-  const deleteEvent = (eventId) => {
-    AgendaService.remove(eventId)
-      .then(() => setEvents(events.filter(e => e.id !== eventId)))
-      .catch(error => alert('Erro ao excluir evento: ' + (error.response?.data?.message || error.message)));
-    setContextMenu({ show: false, x: 0, y: 0, eventId: null });
+  const deleteEvent = async (eventId) => {
+    if (!eventId) return;
+
+    const eventToDelete = events.find(e => e.id === eventId);
+    const confirmed = window.confirm(`Excluir "${eventToDelete?.title || 'este evento'}"?`);
+    if (!confirmed) {
+      setContextMenu({ show: false, x: 0, y: 0, eventId: null });
+      return;
+    }
+
+    try {
+      const checklist = eventToDelete?.checklist || [];
+      await Promise.all(
+        checklist
+          .filter(item => item.id)
+          .map(item => TarefaService.remove(item.id))
+      );
+
+      await AgendaService.remove(eventId);
+      setEvents(currentEvents => currentEvents.filter(e => e.id !== eventId));
+      setShowEventDetails(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Erro ao excluir evento:', error);
+      alert('Erro ao excluir evento: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setContextMenu({ show: false, x: 0, y: 0, eventId: null });
+    }
   };
 
   const changeEventColor = (eventId, color) => {
@@ -325,35 +348,42 @@ function Agenda({ darkTheme }) {
     else setCurrentMonth(currentMonth + 1);
   };
 
-  return (
-    <div className={`agenda-container ${darkTheme ? 'dark-theme' : ''}`} style={{fontFamily: "'Inter', sans-serif"}} onClick={closeContextMenu}>
-      <button
-        type="button"
-        className="dashboard-back"
-        onClick={() => window.location.href = '/?page=dashboard'}
-        aria-label="Voltar para o dashboard"
-        title="Voltar para o dashboard"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M15 18L9 12L15 6" />
-        </svg>
-      </button>
+  const today = new Date();
+  const goToday = () => {
+    setCurrentMonth(today.getMonth());
+    setCurrentYear(today.getFullYear());
+  };
 
-      <div className="calendar">
-        <div className="calendar-navigation">
-          <div className="nav-left">
-            <button onClick={prevMonth} className="nav-btn" aria-label="Mês anterior" title="Mês anterior">‹</button>
-            <div className="month-year">
-              <select value={currentMonth} onChange={(e) => setCurrentMonth(parseInt(e.target.value))} className="month-selector">
-                {monthNames.map((month, index) => <option key={index} value={index}>{month}</option>)}
-              </select>
-              <select value={currentYear} onChange={(e) => setCurrentYear(parseInt(e.target.value))} className="year-selector">
-                {Array.from({length: currentYear - 2019 + 11}, (_, i) => 2019 + i).map(year => <option key={year} value={year}>{year}</option>)}
-              </select>
+  const isTodayCell = (dayObj) => {
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return formatDate(dayObj) === todayKey;
+  };
+
+  return (
+    <div className={`agenda-container ${darkTheme ? 'dark-theme' : ''}`} onClick={closeContextMenu}>
+      <header className="agenda-site-header">
+        <nav className="agenda-nav">
+          <button className="agenda-logo" type="button" onClick={() => window.location.href = '/?page=dashboard'}>
+            <span className="agenda-logo-mark" aria-hidden="true"></span>
+            Taskhub
+          </button>
+          <div className="agenda-nav-controls">
+            <button className="agenda-btn-today" type="button" onClick={goToday}>Hoje</button>
+            <div className="agenda-month-nav">
+              <button onClick={prevMonth} className="agenda-nav-btn" type="button" aria-label="Mês anterior">‹</button>
+              <span className="agenda-month-label">{monthNames[currentMonth]} {currentYear}</span>
+              <button onClick={nextMonth} className="agenda-nav-btn" type="button" aria-label="Próximo mês">›</button>
             </div>
-            <button onClick={nextMonth} className="nav-btn" aria-label="Próximo mês" title="Próximo mês">›</button>
           </div>
-        </div>
+          <button className="agenda-btn-new" type="button" onClick={() => { setEventForm({ ...eventForm, date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}` }); setShowModal(true); }}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+            <span>Novo evento</span>
+          </button>
+        </nav>
+      </header>
+
+      <div className="agenda-page">
+      <div className="calendar">
         <div className="calendar-header">
           <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
         </div>
@@ -361,7 +391,7 @@ function Agenda({ darkTheme }) {
           {getDaysInMonth().map((dayObj, index) => (
             <div
               key={index}
-              className={`calendar-day ${dayObj.type === 'current' ? 'active' : dayObj.type === 'prev' ? 'prev-month' : 'next-month'}`}
+              className={`calendar-day ${dayObj.type === 'current' ? 'active' : 'other-month'} ${isTodayCell(dayObj) ? 'today' : ''}`}
               onClick={() => handleDayClick(dayObj)}
             >
               <span className="day-number">{dayObj.day}</span>
@@ -383,6 +413,13 @@ function Agenda({ darkTheme }) {
           ))}
         </div>
       </div>
+      </div>
+      <footer className="agenda-footer">
+        <div className="agenda-footer-inner">
+          <span>© 2026 Marco</span>
+          <span>Feito para quem cuida do próprio tempo.</span>
+        </div>
+      </footer>
 
       {showModal && (
         <div className="event-overlay">
@@ -458,6 +495,7 @@ function Agenda({ darkTheme }) {
               <h2 className="event-title">{selectedEvent.title}</h2>
               <div className="header-actions">
                 <button className="edit-btn" onClick={editEvent}>Editar</button>
+                <button className="delete-btn" onClick={() => deleteEvent(selectedEvent.id)}>Excluir</button>
                 <button className="close-btn" onClick={() => setShowEventDetails(false)}>×</button>
               </div>
             </div>
@@ -506,7 +544,7 @@ function Agenda({ darkTheme }) {
 
       {contextMenu.show && (
         <div className="context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(e) => e.stopPropagation()}>
-          <div className="context-menu-item delete" onClick={() => deleteEvent(contextMenu.eventId)}>Excluir evento</div>
+          <div className="context-menu-item delete" onClick={(e) => { e.stopPropagation(); deleteEvent(contextMenu.eventId); }}>Excluir evento</div>
           <div className="context-menu-divider"></div>
           <div className="context-menu-section">
             <div className="context-menu-title">Alterar cor</div>
