@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import './App.css'
 import Navbar from "./components/Navbar.jsx";
 import Home from "./pages/Home.jsx";
@@ -17,7 +17,7 @@ function App() {
     return localStorage.getItem('taskhub-theme') === 'dark';
   });
   
-  console.log('Página atual:', currentPage);
+  console.log('PÃ¡gina atual:', currentPage);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -47,11 +47,12 @@ function App() {
 
   return (
     <div className={darkTheme ? 'dark-theme' : ''}>
-      {currentPage !== 'login' && currentPage !== 'cadastro' && currentPage !== 'dashboard' && currentPage !== 'agenda' && currentPage !== 'perfil' && <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} darkTheme={darkTheme} setDarkTheme={setDarkTheme}/>}
+      {currentPage !== 'home' && currentPage !== 'login' && currentPage !== 'cadastro' && currentPage !== 'dashboard' && currentPage !== 'agenda' && currentPage !== 'perfil' && <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} darkTheme={darkTheme} setDarkTheme={setDarkTheme}/>}
       {renderPage()}
-      {currentPage !== 'login' && currentPage !== 'cadastro' && currentPage !== 'agenda' && <Footer/>}
+      {currentPage !== 'home' && currentPage !== 'login' && currentPage !== 'cadastro' && currentPage !== 'agenda' && <Footer/>}
     </div>
   )
 }
 
 export default App
+

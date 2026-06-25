@@ -1,265 +1,143 @@
-import './Home.css';
-import { useState, useEffect } from 'react';
+﻿import './Home.css';
 
-const ChecklistIllustration = () => (
-  <div className="chk-wrapper">
-    <div className="chk-card">
-      <div className="chk-header">Checklist</div>
-      {[
-        { label: 'Revisar tarefas', done: true },
-        { label: 'Reunião de equipe', done: true },
-        { label: 'Enviar relatório', done: false },
-        { label: 'Planejar semana', done: false },
-      ].map((item, i) => (
-        <div key={i} className={`chk-item ${item.done ? 'chk-done' : ''}`}>
-          <span className="chk-box">{item.done ? '✓' : ''}</span>
-          <span className="chk-label">{item.label}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const CalendarIllustration = () => (
-  <div className="cal-wrapper">
-    <div className="cal-bubble cal-bubble-clock">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <circle cx="18" cy="18" r="16" fill="white" stroke="#c7d2fe" strokeWidth="1.5"/>
-        <circle cx="18" cy="18" r="12" fill="#e0e7ff"/>
-        <line x1="18" y1="10" x2="18" y2="18" stroke="#0d1b5e" strokeWidth="2" strokeLinecap="round"/>
-        <line x1="18" y1="18" x2="24" y2="21" stroke="#0d1b5e" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="18" cy="18" r="2" fill="#0d1b5e"/>
-      </svg>
-    </div>
-    <div className="cal-bubble cal-bubble-chat-green">
-      <svg width="40" height="36" viewBox="0 0 40 36" fill="none">
-        <rect width="40" height="30" rx="8" fill="#6ee7b7"/>
-        <polygon points="8,30 16,30 8,38" fill="#6ee7b7"/>
-        <circle cx="14" cy="15" r="3" fill="white"/>
-        <circle cx="20" cy="15" r="3" fill="white"/>
-        <circle cx="26" cy="15" r="3" fill="white"/>
-      </svg>
-    </div>
-    <div className="cal-bubble cal-bubble-chat-teal">
-      <svg width="40" height="36" viewBox="0 0 40 36" fill="none">
-        <rect width="40" height="30" rx="8" fill="#5eead4"/>
-        <polygon points="8,30 16,30 8,38" fill="#5eead4"/>
-        <rect x="10" y="10" width="20" height="3" rx="1.5" fill="white" opacity="0.8"/>
-        <rect x="10" y="16" width="14" height="3" rx="1.5" fill="white" opacity="0.6"/>
-      </svg>
-    </div>
-    <div className="cal-bubble cal-bubble-user">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <circle cx="18" cy="18" r="16" fill="#dbeafe" stroke="#bfdbfe" strokeWidth="1.5"/>
-        <circle cx="18" cy="14" r="5" fill="#93c5fd"/>
-        <path d="M8 28c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="#93c5fd"/>
-      </svg>
-    </div>
-
-    <div className="cal-main">
-      <div className="cal-top-bar">
-        <div className="cal-pin"></div>
-        <div className="cal-pin"></div>
-      </div>
-      <div className="cal-header-bar"></div>
-      <div className="cal-body">
-        {[
-          ['#0d1b5e','#c7d2fe','#c7d2fe','#c7d2fe','#a5f3fc'],
-          ['#c7d2fe','#fde68a','#b45309','#0d1b5e','#c7d2fe'],
-          ['#0d1b5e','#fde68a','#b45309','#0d1b5e','#a5f3fc'],
-          ['#0d1b5e','#a5f3fc','#c7d2fe','#c7d2fe','#c7d2fe'],
-        ].map((row, ri) => (
-          <div key={ri} className="cal-row">
-            {row.map((color, ci) => (
-              <div key={ci} className="cal-cell" style={{ background: color }}></div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <div className="cal-check">
-      <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
-        <circle cx="30" cy="30" r="28" fill="white" stroke="#bfdbfe" strokeWidth="2" opacity="0.9"/>
-        <circle cx="30" cy="30" r="22" fill="#dbeafe" opacity="0.7"/>
-        <polyline points="18,30 26,38 42,22" stroke="#0d1b5e" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </div>
-  </div>
-);
+const days = [
+  { n: '31', muted: true }, { n: '1' }, { n: '2', event: true }, { n: '3' }, { n: '4', event: true }, { n: '5' }, { n: '6' },
+  { n: '7' }, { n: '8' }, { n: '9' }, { n: '10', event: true }, { n: '11' }, { n: '12' }, { n: '13' },
+  { n: '14' }, { n: '15' }, { n: '16' }, { n: '17' }, { n: '18' }, { n: '19' }, { n: '20' },
+  { n: '21' }, { n: '22' }, { n: '23' }, { n: '24' }, { n: '25', today: true, event: true }, { n: '26', event: true }, { n: '27' },
+  { n: '28' }, { n: '29', event: true }, { n: '30' }, { n: '1', muted: true }, { n: '2', muted: true }, { n: '3', muted: true }, { n: '4', muted: true },
+];
 
 const features = [
-  {
-    title: 'Planner Inteligente',
-    desc: 'Organize seus compromissos em um calendário visual e intuitivo. Visualize seus eventos e nunca mais perca um compromisso importante.',
-    icon: (
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <defs>
-          <linearGradient id="calendarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3949ab" />
-            <stop offset="50%" stopColor="#5c6bc0" />
-            <stop offset="100%" stopColor="#7986cb" />
-          </linearGradient>
-          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#3949ab" floodOpacity="0.3"/>
-          </filter>
-        </defs>
-        <rect x="4" y="10" width="48" height="42" rx="6" fill="url(#calendarGrad)" opacity="0.1" filter="url(#shadow)"/>
-        <rect x="4" y="10" width="48" height="14" rx="6" fill="url(#calendarGrad)"/>
-        <rect x="4" y="19" width="48" height="5" fill="url(#calendarGrad)" opacity="0.8"/>
-        <rect x="16" y="4" width="6" height="12" rx="3" fill="url(#calendarGrad)" filter="url(#shadow)"/>
-        <rect x="34" y="4" width="6" height="12" rx="3" fill="url(#calendarGrad)" filter="url(#shadow)"/>
-        <rect x="9"  y="29" width="8" height="7" rx="2" fill="#fde68a" filter="url(#shadow)"/>
-        <rect x="20" y="29" width="8" height="7" rx="2" fill="#fde68a" filter="url(#shadow)"/>
-        <rect x="31" y="29" width="8" height="7" rx="2" fill="#fde68a" filter="url(#shadow)"/>
-        <rect x="42" y="29" width="8" height="7" rx="2" fill="#fde68a" filter="url(#shadow)"/>
-        <rect x="9"  y="39" width="8" height="7" rx="2" fill="url(#calendarGrad)" opacity="0.4"/>
-        <rect x="20" y="39" width="8" height="7" rx="2" fill="url(#calendarGrad)" opacity="0.4"/>
-        <rect x="31" y="39" width="8" height="7" rx="2" fill="url(#calendarGrad)" opacity="0.4"/>
-        <circle cx="13" cy="32" r="1.5" fill="white" opacity="0.8"/>
-        <circle cx="24" cy="32" r="1.5" fill="white" opacity="0.8"/>
-        <circle cx="35" cy="32" r="1.5" fill="white" opacity="0.8"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Checklist Dinâmico',
-    desc: 'Crie listas de tarefas personalizadas para cada evento. Marque itens como concluídos e acompanhe seu progresso em tempo real.',
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <defs>
-          <linearGradient id="checklistGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3949ab" />
-            <stop offset="50%" stopColor="#5c6bc0" />
-            <stop offset="100%" stopColor="#7986cb" />
-          </linearGradient>
-          <filter id="checkShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#3949ab" floodOpacity="0.3"/>
-          </filter>
-        </defs>
-        <rect x="12" y="6" width="28" height="40" rx="5" fill="url(#checklistGrad)" filter="url(#checkShadow)"/>
-        <rect x="14" y="8" width="24" height="36" rx="3" fill="white" opacity="0.95"/>
-        <rect x="16" y="14" width="20" height="3" rx="1.5" fill="url(#checklistGrad)" opacity="0.7"/>
-        <rect x="16" y="21" width="20" height="3" rx="1.5" fill="url(#checklistGrad)" opacity="0.7"/>
-        <rect x="16" y="28" width="16" height="3" rx="1.5" fill="url(#checklistGrad)" opacity="0.5"/>
-        <rect x="16" y="35" width="18" height="3" rx="1.5" fill="url(#checklistGrad)" opacity="0.5"/>
-        <circle cx="6" cy="26" r="5" fill="url(#checklistGrad)" opacity="0.2" filter="url(#checkShadow)"/>
-        <circle cx="46" cy="26" r="5" fill="url(#checklistGrad)" opacity="0.2" filter="url(#checkShadow)"/>
-        <polyline points="3,26 6,29 9,23" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <polyline points="43,26 46,29 49,23" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="18" cy="15" r="1" fill="#10b981"/>
-        <circle cx="18" cy="22" r="1" fill="#f59e0b"/>
-        <circle cx="18" cy="29" r="1" fill="#ef4444"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Anexos multimídia',
-    desc: 'Adicione contexto visual aos seus eventos com imagens e documentos. Mantenha tudo organizado em um só lugar.',
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <defs>
-          <linearGradient id="mediaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3949ab" />
-            <stop offset="50%" stopColor="#5c6bc0" />
-            <stop offset="100%" stopColor="#7986cb" />
-          </linearGradient>
-          <filter id="mediaShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#3949ab" floodOpacity="0.3"/>
-          </filter>
-        </defs>
-        <path d="M26 6C17 6 12 12 12 22v10l-4 4h36l-4-4v-10c0-10-5-16-14-16z" fill="url(#mediaGrad)" filter="url(#mediaShadow)"/>
-        <rect x="22" y="42" width="8" height="4" rx="2" fill="url(#mediaGrad)"/>
-        <circle cx="40" cy="12" r="6" fill="#fde68a" stroke="#f59e0b" strokeWidth="2" filter="url(#mediaShadow)"/>
-        <circle cx="6" cy="22" r="4" fill="url(#mediaGrad)" opacity="0.3" filter="url(#mediaShadow)"/>
-        <circle cx="46" cy="30" r="3" fill="url(#mediaGrad)" opacity="0.3" filter="url(#mediaShadow)"/>
-        <rect x="18" y="16" width="16" height="12" rx="3" fill="white" opacity="0.95" filter="url(#mediaShadow)"/>
-        <circle cx="22" cy="20" r="2" fill="url(#mediaGrad)"/>
-        <polygon points="18,25 24,22 28,24 34,22 34,28 18,28" fill="url(#mediaGrad)" opacity="0.7"/>
-        <rect x="20" y="30" width="12" height="2" rx="1" fill="url(#mediaGrad)" opacity="0.6"/>
-        <rect x="20" y="33" width="8" height="2" rx="1" fill="url(#mediaGrad)" opacity="0.4"/>
-        <circle cx="40" cy="12" r="2" fill="white" opacity="0.8"/>
-        <path d="M38,12 L40,14 L42,10" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
+  ['◷', 'Planner Inteligente', 'Organize seus objetivos em um calendário intuitivo. Visualize seus eventos e nunca mais perca um compromisso.'],
+  ['▤', 'Checklist dinâmico', 'Crie listas de tarefas personalizadas para cada evento. Marque seus itens como concluídos e acompanhe seu progresso em tempo real.'],
+  ['⊙', 'Anexo multimídia', 'Adicione contexto visual aos seus eventos. Anexe imagens, vídeos e documentos para manter todas as informações importantes em um só lugar.'],
+];
+
+const weekCells = [
+  ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
+  ['09h', '', 'Reunião', '', '', 'Entrega'],
+  ['11h', 'Compras', '', 'Projeto', '', ''],
+  ['14h', '', '', '', '1:1', ''],
+  ['16h', 'Revisão', '', '', '', ''],
 ];
 
 function Home({ setCurrentPage }) {
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+  const goTo = (page) => setCurrentPage && setCurrentPage(page);
 
   return (
-    <>
-      {showSplash && (
-        <div className="splash-screen">
-          <div className="splash-content">
-            <svg width="100" height="100" viewBox="0 0 36 36" fill="none">
-              <rect x="2" y="6" width="24" height="22" rx="4" fill="#0d1b5e" stroke="#1a237e" strokeWidth="1.2"/>
-              <rect x="2" y="6" width="24" height="9" rx="4" fill="#0d1b5e"/>
-              <rect x="2" y="11" width="24" height="4" fill="#0d1b5e"/>
-              <rect x="4" y="14" width="20" height="13" rx="2" fill="white"/>
-              <rect x="9" y="3" width="4" height="7" rx="2" fill="white" stroke="#1a237e" strokeWidth="1"/>
-              <rect x="15" y="3" width="4" height="7" rx="2" fill="white" stroke="#1a237e" strokeWidth="1"/>
-              <rect x="6" y="16" width="4" height="3.5" rx="0.8" fill="#3949ab"/>
-              <rect x="11" y="16" width="4" height="3.5" rx="0.8" fill="#0d1b5e" opacity="0.6"/>
-              <rect x="6" y="20.5" width="4" height="3.5" rx="0.8" fill="#0d1b5e" opacity="0.6"/>
-              <rect x="11" y="20.5" width="4" height="3.5" rx="0.8" fill="#3949ab"/>
-              <circle cx="26" cy="26" r="8" fill="white" stroke="#0d1b5e" strokeWidth="2.2"/>
-              <circle cx="26" cy="26" r="5.5" fill="white"/>
-              <polyline points="22.5,26 25,28.5 29.5,22.5" stroke="#0d1b5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="32" y1="32" x2="34" y2="34" stroke="#0d1b5e" strokeWidth="3" strokeLinecap="round"/>
-            </svg>
-            <h2>TaskHub</h2>
+    <div className='taskhub-home'>
+      <header className='home-header'>
+        <nav className='home-nav home-container'>
+          <button className='home-logo' type='button' onClick={() => goTo('home')}>
+            <span className='home-logo-mark' aria-hidden='true' />
+            TaskHub
+          </button>
+          <div className='home-nav-links'>
+            <a href='#recursos'>Recursos</a>
+            <a href='#semana'>Como funciona</a>
           </div>
-        </div>
-      )}
-      <div className={showSplash ? 'home hidden' : `home`}>
+          <div className='home-nav-actions'>
+            <button className='home-btn home-btn-ghost' type='button' onClick={() => goTo('login')}>Entrar</button>
+          </div>
+        </nav>
+      </header>
 
-      {/* Hero */}
-      <section className="hero">
-        <div className="hero-particles">
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-        </div>
-        <div className="hero-content">
-          <h1>Organize sua vida com o TaskHub</h1>
-          <p>Sua agenda digital completa para planejar, organizar e conquistar seus objetivos.</p>
-          <button className="cta-button" onClick={() => setCurrentPage('cadastro')}>Começar agora</button>
-        </div>
-        <div className="hero-image">
-          <ChecklistIllustration />
-          <CalendarIllustration />
-        </div>
-      </section>
-
-      {/* Key Features */}
-      <section className="features">
-        <h2>Recursos</h2>
-        <div className="features-container">
-          {features.map((f, index) => (
-            <div key={f.title} className="feature-item" style={{ animationDelay: `${index * 0.1}s` }}>
-              <div className="feature-number">{index + 1}</div>
-              <div className="feature-content">
-                <div className="feature-icon-wrapper">{f.icon}</div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
+      <main className='home-container'>
+        <section className='home-hero'>
+          <div className='home-hero-grid'>
+            <div>
+             
+              <h1>Organize sua vida com o <em>Taskhub</em>.</h1>
+              <p className='home-lead'>TaskHub organiza reuniões, tarefas e compromissos pessoais num só lugar, com organizações que respeitam o seu foco — não só a sua disponibilidade.</p>
+              <div className='home-hero-cta'>
+                <button className='home-btn home-btn-primary home-btn-large' type='button' onClick={() => goTo('cadastro')}>Criar conta</button>
+              </div>
+              <div className='home-hero-meta'>
+                <div className='home-avatar-stack'><span>JL</span><span>MS</span><span>+</span></div>
+                usado por mais de 4 mil pessoas todos os dias
               </div>
             </div>
-          ))}
+
+            <div className='home-calendar-wrap' aria-label='Calendário de junho de 2026'>
+              <div className='home-calendar-head'>
+                <div className='home-calendar-title'>Junho <span>2026</span></div>
+                <div className='home-calendar-nav'>
+                  <button aria-label='mês anterior' type='button'>‹</button>
+                  <button aria-label='próximo mês' type='button'>›</button>
+                </div>
+              </div>
+              <div className='home-weekdays'><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+              <div className='home-days'>
+                {days.map((day, index) => {
+                  const classes = ['home-day', day.muted && 'muted', day.today && 'today', day.event && 'has-event'].filter(Boolean).join(' ');
+                  return <div key={day.n + '-' + index} className={classes}>{day.n}{day.event && <div className='home-evt' />}</div>;
+                })}
+              </div>
+              <div className='home-calendar-footer'>
+                <div className='home-agenda-item'><div className='home-agenda-bar' /><span className='home-agenda-time'>09:30</span><span>Revisão de projeto com a equipe</span></div>
+                <div className='home-agenda-item'><div className='home-agenda-bar alt' /><span className='home-agenda-time'>14:00</span><span>Compras</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className='home-section' id='recursos'>
+          <div className='home-section-head'>
+            <div className='home-section-eyebrow'>Recursos</div>
+            <h2>Menos tempo organizando o calendário, mais tempo para você.</h2>
+            <p>Cada detalhe do TaskHub existe para tirar uma decisão pequena das suas mãos — para que sobre energia para as grandes.</p>
+          </div>
+          <div className='home-feature-grid'>
+            {features.map(([icon, title, text]) => (
+              <article className='home-feature-card' key={title}>
+                <div className='home-feature-icon'>{icon}</div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section className='home-section' id='semana'>
+          <div className='home-showcase'>
+            <div>
+              <div className='home-section-eyebrow'>Visão da semana</div>
+              <h2>Veja sua semana inteira sem perder o que importa no dia.</h2>
+              <p className='home-desc'>A grade semanal do TaskHub destaca compromissos fixos e deixa sua rotina mais simples.</p>
+              <div className='home-showcase-list'>
+                <div className='home-item'><span className='home-check'>✓</span>Arraste para mover um compromisso para outro horário</div>
+                <div className='home-item'><span className='home-check'>✓</span>Compromissos importantes ganham destaque automático</div>
+                <div className='home-item'><span className='home-check'>✓</span>Alterne entre dia, semana e mês com um clique</div>
+              </div>
+            </div>
+            <div className='home-week-card'>
+              <div className='home-week-card-head'><span>22 a 26 de junho</span><span>Semana atual</span></div>
+              <div className='home-week-grid'>
+                {weekCells.flatMap((row, rowIndex) => row.map((cell, cellIndex) => {
+                  const isHead = rowIndex === 0;
+                  const isTime = cellIndex === 0 && rowIndex > 0;
+                  const classes = ['home-cell', isHead && 'head', isTime && 'time', cell && !isHead && !isTime && 'block', cell === 'Entrega' && 'accent'].filter(Boolean).join(' ');
+                  return <div key={rowIndex + '-' + cellIndex} className={classes}>{cell}</div>;
+                }))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className='home-footer'>
+        <div className='home-container'>
+          <div className='home-footer-grid'>
+            <div className='home-footer-brand'>
+              <div className='home-logo'><span className='home-logo-mark' aria-hidden='true' />TaskHub</div>
+              <p>O calendário que organiza o seu tempo em torno do que realmente importa.</p>
+            </div>
+            <div className='home-footer-col'><h4>Produto</h4><a href='#recursos'>Recursos</a><a href='#precos'>Funcionamento</a><a href='#semana'>Integrações</a><a href='#semana'>Aplicativo mobile</a></div>
+            <div className='home-footer-col'><h4>Empresa</h4><button type='button' onClick={() => goTo('sobre')}>Sobre</button><a href='#'>Carreiras</a><a href='#'>Imprensa</a><a href='#'>Contato</a></div>
+            <div className='home-footer-col'><h4>Suporte</h4><a href='#'>Central de ajuda</a><a href='#'>Comunidade</a><a href='#'>Status do sistema</a><a href='#'>Privacidade</a></div>
+          </div>
+          <div className='home-footer-bottom'><span>© 2026 TaskHub. Todos os direitos reservados.</span><span>Feito para quem cuida do próprio tempo.</span></div>
         </div>
-      </section>
+      </footer>
     </div>
-    </>
   );
 }
 
