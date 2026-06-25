@@ -95,7 +95,6 @@ function Agenda({ darkTheme }) {
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, eventId: null });
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(false);
 
   const eventColors = {
     purple: '#c684d1ff',
@@ -226,11 +225,6 @@ function Agenda({ darkTheme }) {
 
   const closeContextMenu = () => setContextMenu({ show: false, x: 0, y: 0, eventId: null });
 
-  const handleNewEvent = () => {
-    setEventForm({ title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#1a73e8', icon: '' });
-    setShowModal(true);
-    setShowSidebar(false);
-  };
 
   const handleEventClick = (e, event) => {
     e.stopPropagation();
@@ -334,33 +328,21 @@ function Agenda({ darkTheme }) {
   return (
     <div className={`agenda-container ${darkTheme ? 'dark-theme' : ''}`} style={{fontFamily: "'Inter', sans-serif"}} onClick={closeContextMenu}>
       <button
-        className={`menu-toggle ${showSidebar ? 'open' : ''}`}
-        onClick={() => setShowSidebar(!showSidebar)}
-        aria-label="Abrir menu"
+        type="button"
+        className="dashboard-back"
+        onClick={() => window.location.href = '/?page=dashboard'}
+        aria-label="Voltar para o dashboard"
+        title="Voltar para o dashboard"
       >
-        <span aria-hidden="true">&#9776;</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M15 18L9 12L15 6" />
+        </svg>
       </button>
-      <div className={`sidebar ${showSidebar ? 'show' : ''}`}>
-        <div className="sidebar-content">
-          <div className="sidebar-item" onClick={handleNewEvent}>
-            <div className="sidebar-label">+ Novo Evento</div>
-          </div>
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=dashboard'}>
-            <div className="sidebar-label">Home</div>
-          </div>
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=perfil'}>
-            <div className="sidebar-label">Perfil</div>
-          </div>
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=home'}>
-            <div className="sidebar-label">Sair</div>
-          </div>
-        </div>
-      </div>
 
-      <div className={`calendar ${showSidebar ? 'sidebar-open' : ''}`}>
+      <div className="calendar">
         <div className="calendar-navigation">
           <div className="nav-left">
-            <button onClick={prevMonth} className="nav-btn">‹</button>
+            <button onClick={prevMonth} className="nav-btn" aria-label="Mês anterior" title="Mês anterior">‹</button>
             <div className="month-year">
               <select value={currentMonth} onChange={(e) => setCurrentMonth(parseInt(e.target.value))} className="month-selector">
                 {monthNames.map((month, index) => <option key={index} value={index}>{month}</option>)}
@@ -369,7 +351,7 @@ function Agenda({ darkTheme }) {
                 {Array.from({length: currentYear - 2019 + 11}, (_, i) => 2019 + i).map(year => <option key={year} value={year}>{year}</option>)}
               </select>
             </div>
-            <button onClick={nextMonth} className="nav-btn">›</button>
+            <button onClick={nextMonth} className="nav-btn" aria-label="Próximo mês" title="Próximo mês">›</button>
           </div>
         </div>
         <div className="calendar-header">

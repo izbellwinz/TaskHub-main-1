@@ -7,7 +7,7 @@ function Perfil({ darkTheme }) {
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [activeSection, setActiveSection] = useState('dados');
-  const [userData, setUserData] = useState({ nome: '', email: '', telefone: '' });
+  const [userData, setUserData] = useState({ nome: '', email: '' });
   const [showForgot, setShowForgot] = useState(false);
   const [forgotData, setForgotData] = useState({ novaSenha: '', confirmarSenha: '' });
   const [forgotError, setForgotError] = useState('');
@@ -16,7 +16,7 @@ function Perfil({ darkTheme }) {
   useEffect(() => {
     const user = UsuarioService.getCurrentUser();
     if (user) {
-      setUserData({ nome: user.nome || '', email: user.email || '', telefone: user.telefone || '' });
+      setUserData({ nome: user.nome || '', email: user.email || '' });
       setProfilePhoto(user.foto || null);
     }
   }, []);
@@ -37,7 +37,7 @@ function Perfil({ darkTheme }) {
       foto: foto || ''
     })
       .then((response) => {
-        updateCurrentUser({ ...user, ...response.data, telefone: userData.telefone });
+        updateCurrentUser({ ...user, ...response.data });
       })
       .catch(error => alert('Erro ao salvar foto: ' + (error.response?.data?.message || error.message)));
   };
@@ -173,10 +173,6 @@ function Perfil({ darkTheme }) {
                 <label>Email</label>
                 <input type="email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
                 <button className="perfil-forgot-link" type="button" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
-              </div>
-              <div className="field-group">
-                <label>Telefone</label>
-                <input type="tel" placeholder="(00) 00000-0000" value={userData.telefone} onChange={(e) => setUserData({ ...userData, telefone: e.target.value })} />
               </div>
             </div>
 
