@@ -1,15 +1,81 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '../../styles/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS, shadows } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { authService, agendaService } from '../../services/api';
 
+const BRAND = {
+  primary: '#0d1b5e',
+  indigo: '#3949ab',
+  indigo2: '#5c6bc0',
+  soft: '#eef2ff',
+  soft2: '#f5f7ff',
+  yellow: '#fde68a',
+};
+
 const STAT_CARDS = [
-  { emoji: '✅', label: 'Concluídas', key: 'completed', color: COLORS.low, textColor: '#166534' },
-  { emoji: '⏳', label: 'Pendentes', key: 'pending', color: COLORS.medium, textColor: '#1E40AF' },
-  { emoji: '🔥', label: 'Total', key: 'total', color: COLORS.high, textColor: '#991B1B' },
-  { emoji: '⚡', label: 'Eficiência', key: 'efficiency', color: '#EDE9FE', textColor: '#5B21B6' },
+  {
+    label: 'Concluidas',
+    key: 'completed',
+    icon: 'check-circle',
+    color: '#dcfce7',
+    textColor: '#166534',
+  },
+  {
+    label: 'Pendentes',
+    key: 'pending',
+    icon: 'clock',
+    color: '#dbeafe',
+    textColor: '#1e40af',
+  },
+  {
+    label: 'Total',
+    key: 'total',
+    icon: 'calendar',
+    color: '#fee2e2',
+    textColor: '#991b1b',
+  },
+  {
+    label: 'Eficiencia',
+    key: 'efficiency',
+    icon: 'zap',
+    color: '#ede9fe',
+    textColor: '#5b21b6',
+  },
 ];
+
+const WEEK_DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'];
+
+function formatDate(date) {
+  if (!date) return 'Sem data';
+  return date.split('-').reverse().join('/');
+}
+
+function getWeeklyData(items) {
+  const counts = WEEK_DAYS.map((day) => ({ day, value: 0 }));
+
+  items.forEach((item) => {
+    if (!item.dataAgenda) return;
+    const date = new Date(`${item.dataAgenda}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return;
+    const index = (date.getDay() + 6) % 7;
+    counts[index].value += 1;
+  });
+
+  const max = Math.max(...counts.map((item) => item.value), 1);
+  return counts.map((item) => ({
+    ...item,
+    percent: item.value === 0 ? 8 : Math.max(18, Math.round((item.value / max) * 100)),
+  }));
+}
 
 export default function StatsScreen() {
   const tabBarPadding = useTabBarPadding();
@@ -20,8 +86,9 @@ export default function StatsScreen() {
     pending: 0,
     total: 0,
     efficiency: '0%',
+    progress: 0,
     recent: [],
-    weeklyData: []
+    weeklyData: getWeeklyData([]),
   });
 
   const loadStats = useCallback(async () => {
@@ -30,28 +97,22 @@ export default function StatsScreen() {
       if (user) {
         const data = await agendaService.findByUsuarioId(user.id);
         const total = data.length;
-        const completed = data.filter(e => e.statusAgenda === 'CONCLUIDO').length;
+        const completed = data.filter((event) => event.statusAgenda === 'CONCLUIDO').length;
         const pending = total - completed;
-        const efficiency = total > 0 ? Math.round((completed / total) * 100) + '%' : '0%';
-        
-        // Simular dados semanais baseados nos dados reais
-        const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-        const weeklyData = days.map(day => ({
-          day,
-          value: Math.floor(Math.random() * 100) // Como o backend não tem histórico diário detalhado, mantemos uma simulação visual baseada em dados reais
-        }));
+        const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         setStats({
           total,
           completed,
           pending,
-          efficiency,
-          recent: data.slice(-3).reverse(),
-          weeklyData
+          progress,
+          efficiency: `${progress}%`,
+          recent: data.slice(-4).reverse(),
+          weeklyData: getWeeklyData(data),
         });
       }
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      console.error('Erro ao carregar estatisticas:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -69,69 +130,150 @@ export default function StatsScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={[styles.loading, styles.center]}>
+        <ActivityIndicator size="large" color={BRAND.primary} />
       </View>
     );
   }
 
   return (
-    <ScrollView 
-      style={styles.container} 
-      contentContainerStyle={{ paddingBottom: tabBarPadding }} 
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: tabBarPadding }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      bounces={false} 
+      bounces={false}
       overScrollMode="never"
+      showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>📊 Estatísticas</Text>
-      <Text style={styles.subtitle}>Sua produtividade baseada na Agenda</Text>
-
-      <View style={styles.statsGrid}>
-        {STAT_CARDS.map((s, i) => (
-          <View key={i} style={[styles.statCard, { backgroundColor: s.color }]}>
-            <Text style={styles.statEmoji}>{s.emoji}</Text>
-            <Text style={[styles.statValue, { color: s.textColor }]}>{String(stats[s.key])}</Text>
-            <Text style={[styles.statLabel, { color: s.textColor }]}>{s.label}</Text>
+      <View style={styles.hero}>
+        <View style={styles.heroTop}>
+          <View>
+            <Text style={styles.eyebrow}>Estatisticas</Text>
+            <Text style={styles.heroTitle}>Visao geral</Text>
           </View>
-        ))}
+          <View style={styles.heroIcon}>
+            <Feather name="bar-chart-2" size={22} color={BRAND.primary} />
+          </View>
+        </View>
+
+        <Text style={styles.heroCopy}>
+          Acompanhe conclusoes, pendencias e o ritmo das tarefas da sua agenda.
+        </Text>
+
+        <View style={styles.heroProgressCard}>
+          <View>
+            <Text style={styles.progressCaption}>Conclusao total</Text>
+            <Text style={styles.progressValue}>{stats.efficiency}</Text>
+          </View>
+          <View style={styles.progressRing}>
+            <Feather name="trending-up" size={24} color={BRAND.primary} />
+          </View>
+        </View>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${stats.progress}%` }]} />
+        </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>🏆 Produtividade Geral</Text>
-        <View style={styles.bigStat}>
-          <Text style={styles.bigValue}>{stats.efficiency}</Text>
-          <Text style={styles.bigLabel}>conclusão total</Text>
-        </View>
-        <View style={styles.bars}>
-          {stats.weeklyData.map((item) => (
-            <View key={item.day} style={styles.barWrapper}>
-              <View style={styles.barTrack}>
-                <View style={[styles.barFill, { height: `${item.value}%`, backgroundColor: item.value >= 70 ? COLORS.accent : COLORS.border }]} />
+      <View style={styles.content}>
+        <View style={styles.statsGrid}>
+          {STAT_CARDS.map((stat) => (
+            <View key={stat.key} style={styles.statCard}>
+              <View style={[styles.statIcon, { backgroundColor: stat.color }]}>
+                <Feather name={stat.icon} size={18} color={stat.textColor} />
               </View>
-              <Text style={styles.barLabel}>{item.day}</Text>
+              <Text style={[styles.statValue, { color: stat.textColor }]}>
+                {String(stats[stat.key])}
+              </Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
           ))}
         </View>
-      </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>🕐 Atividade recente</Text>
-        {stats.recent.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhuma atividade recente</Text>
-        ) : (
-          stats.recent.map((item) => (
-            <View key={item.id} style={styles.recentItem}>
-              <Text style={styles.recentEmoji}>📅</Text>
-              <View style={styles.recentInfo}>
-                <Text style={[styles.recentTitle, item.statusAgenda === 'CONCLUIDO' && styles.recentDone]}>{item.titulo}</Text>
-                <Text style={styles.recentDate}>{item.dataAgenda.split('-').reverse().join('/')}</Text>
-              </View>
-              <Text style={[styles.recentStatus, { color: item.statusAgenda === 'CONCLUIDO' ? '#166534' : COLORS.secondaryText }]}>
-                {item.statusAgenda === 'CONCLUIDO' ? '✓ Feito' : '• Pendente'}
-              </Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View>
+              <Text style={styles.cardTitle}>Distribuicao semanal</Text>
+              <Text style={styles.cardSubtitle}>Tarefas agrupadas por dia da semana</Text>
             </View>
-          ))
-        )}
+            <View style={styles.cardIcon}>
+              <Feather name="activity" size={18} color={BRAND.indigo} />
+            </View>
+          </View>
+
+          <View style={styles.bars}>
+            {stats.weeklyData.map((item) => (
+              <View key={item.day} style={styles.barWrapper}>
+                <View style={styles.barTrack}>
+                  <View
+                    style={[
+                      styles.barFill,
+                      {
+                        height: `${item.percent}%`,
+                        backgroundColor: item.value > 0 ? BRAND.indigo : '#d8def8',
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.barValue}>{item.value}</Text>
+                <Text style={styles.barLabel}>{item.day}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View>
+              <Text style={styles.cardTitle}>Atividade recente</Text>
+              <Text style={styles.cardSubtitle}>Ultimas movimentacoes da agenda</Text>
+            </View>
+            <View style={styles.cardIcon}>
+              <Feather name="clock" size={18} color={BRAND.indigo} />
+            </View>
+          </View>
+
+          {stats.recent.length === 0 ? (
+            <View style={styles.emptyWrap}>
+              <Feather name="inbox" size={22} color={BRAND.indigo2} />
+              <Text style={styles.emptyText}>Nenhuma atividade recente</Text>
+            </View>
+          ) : (
+            stats.recent.map((item, index) => {
+              const done = item.statusAgenda === 'CONCLUIDO';
+              return (
+                <View
+                  key={item.id || `${item.titulo}-${index}`}
+                  style={[
+                    styles.recentItem,
+                    index === stats.recent.length - 1 && styles.recentItemLast,
+                  ]}
+                >
+                  <View style={[styles.recentIcon, done ? styles.recentIconDone : styles.recentIconPending]}>
+                    <Feather
+                      name={done ? 'check' : 'calendar'}
+                      size={16}
+                      color={done ? '#166534' : BRAND.indigo}
+                    />
+                  </View>
+                  <View style={styles.recentInfo}>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.recentTitle, done && styles.recentDone]}
+                    >
+                      {item.titulo || 'Tarefa sem titulo'}
+                    </Text>
+                    <Text style={styles.recentDate}>{formatDate(item.dataAgenda)}</Text>
+                  </View>
+                  <View style={[styles.statusPill, done ? styles.statusDone : styles.statusPending]}>
+                    <Text style={[styles.statusText, done ? styles.statusTextDone : styles.statusTextPending]}>
+                      {done ? 'Feito' : 'Pendente'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </View>
       </View>
     </ScrollView>
   );
@@ -140,78 +282,175 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    paddingTop: 70,
-    paddingHorizontal: SPACING.lg,
+    backgroundColor: '#f0f2f5',
   },
-  title: {
-    fontSize: TYPOGRAPHY.title,
+  loading: {
+    flex: 1,
+    backgroundColor: '#f0f2f5',
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hero: {
+    backgroundColor: BRAND.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 58,
+    paddingBottom: SPACING.lg,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  heroTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  eyebrow: {
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.72)',
     fontWeight: '800',
-    color: COLORS.text,
+    marginBottom: 6,
+  },
+  heroTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: '800',
+    color: COLORS.white,
+  },
+  heroIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroCopy: {
+    marginTop: 10,
+    maxWidth: 320,
+    fontSize: TYPOGRAPHY.small,
+    lineHeight: 20,
+    color: 'rgba(255,255,255,0.82)',
+  },
+  heroProgressCard: {
+    marginTop: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressCaption: {
+    fontSize: TYPOGRAPHY.small,
+    color: 'rgba(255,255,255,0.72)',
+    fontWeight: '700',
     marginBottom: 4,
   },
-  subtitle: {
-    fontSize: TYPOGRAPHY.small,
-    color: COLORS.secondaryText,
-    marginBottom: SPACING.lg,
+  progressValue: {
+    fontSize: 44,
+    lineHeight: 48,
+    fontWeight: '800',
+    color: COLORS.white,
+  },
+  progressRing: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: BRAND.yellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressTrack: {
+    height: 9,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 999,
+    marginTop: SPACING.md,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: BRAND.indigo2,
+    borderRadius: 999,
+  },
+  content: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   statCard: {
     width: '47%',
+    minHeight: 132,
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    alignItems: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#e6e9f8',
+    ...shadows.md,
   },
-  statEmoji: {
-    fontSize: 22,
-    marginBottom: 8,
+  statIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 30,
+    lineHeight: 34,
     fontWeight: '800',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: TYPOGRAPHY.small,
-    fontWeight: '600',
+    color: COLORS.secondaryText,
+    fontWeight: '700',
   },
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: RADIUS.lg,
+    borderRadius: 24,
     padding: SPACING.lg,
     marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: '#e6e9f8',
+    ...shadows.md,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: SPACING.lg,
   },
   cardTitle: {
     fontSize: TYPOGRAPHY.subtitle,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  bigStat: {
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  bigValue: {
-    fontSize: 56,
     fontWeight: '800',
-    color: COLORS.primary,
-    lineHeight: 60,
+    color: COLORS.text,
+    marginBottom: 4,
   },
-  bigLabel: {
+  cardSubtitle: {
     fontSize: TYPOGRAPHY.small,
     color: COLORS.secondaryText,
-    fontWeight: '600',
+  },
+  cardIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 13,
+    backgroundColor: BRAND.soft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bars: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 100,
+    height: 146,
   },
   barWrapper: {
     alignItems: 'center',
@@ -220,41 +459,65 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   barTrack: {
-    width: 24,
-    height: 80,
-    backgroundColor: COLORS.background,
-    borderRadius: 6,
+    width: 26,
+    height: 94,
+    backgroundColor: BRAND.soft2,
+    borderRadius: 999,
     justifyContent: 'flex-end',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e4e8fb',
   },
   barFill: {
     width: '100%',
-    borderRadius: 6,
+    borderRadius: 999,
+  },
+  barValue: {
+    fontSize: 11,
+    color: BRAND.primary,
+    fontWeight: '800',
+    marginTop: 8,
   },
   barLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: COLORS.secondaryText,
-    fontWeight: '600',
-    marginTop: 4,
+    fontWeight: '700',
+    marginTop: 3,
   },
   recentItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  recentEmoji: {
-    fontSize: 20,
+  recentItemLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  recentIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentIconDone: {
+    backgroundColor: COLORS.low,
+  },
+  recentIconPending: {
+    backgroundColor: BRAND.soft,
   },
   recentInfo: {
     flex: 1,
+    minWidth: 0,
   },
   recentTitle: {
     fontSize: TYPOGRAPHY.body,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.text,
+    marginBottom: 3,
   },
   recentDone: {
     textDecorationLine: 'line-through',
@@ -264,13 +527,40 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.small,
     color: COLORS.secondaryText,
   },
-  recentStatus: {
-    fontSize: 12,
-    fontWeight: '700',
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  statusDone: {
+    backgroundColor: COLORS.low,
+  },
+  statusPending: {
+    backgroundColor: BRAND.soft,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  statusTextDone: {
+    color: '#166534',
+  },
+  statusTextPending: {
+    color: BRAND.indigo,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: BRAND.soft2,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.xl,
+    borderWidth: 1,
+    borderColor: '#e4e8fb',
   },
   emptyText: {
-    textAlign: 'center',
+    fontSize: TYPOGRAPHY.body,
     color: COLORS.secondaryText,
-    paddingVertical: 20,
-  }
+    fontWeight: '600',
+  },
 });

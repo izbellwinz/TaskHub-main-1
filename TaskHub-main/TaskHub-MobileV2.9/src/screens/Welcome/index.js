@@ -9,7 +9,6 @@ export default function WelcomeScreen({ navigation }) {
   return (
     <ScreenContainer background={COLORS.background}>
       <View style={styles.container}>
-
         <View style={styles.hero}>
           <View style={styles.logoWrap}>
             <View style={styles.logo}>
@@ -20,12 +19,12 @@ export default function WelcomeScreen({ navigation }) {
 
           <Text style={styles.appName}>TaskHub</Text>
           <Text style={styles.headline}>Organize suas{'\n'}prioridades.</Text>
-          <Text style={styles.sub}>Uma experiência moderna e focada{'\n'}em produtividade.</Text>
+          <Text style={styles.sub}>Uma experiencia moderna e focada{'\n'}em produtividade.</Text>
 
           <View style={styles.pills}>
-            {['📋 Tasks', '📅 Calendar', '📊 Stats'].map(p => (
-              <View key={p} style={styles.pill}>
-                <Text style={styles.pillText}>{p}</Text>
+            {['Agenda', 'Calendario', 'Stats'].map((pill) => (
+              <View key={pill} style={styles.pill}>
+                <Text style={styles.pillText}>{pill}</Text>
               </View>
             ))}
           </View>
@@ -33,23 +32,21 @@ export default function WelcomeScreen({ navigation }) {
 
         <View style={styles.actions}>
           <Button title="Entrar" onPress={() => navigation.navigate(ROUTES.LOGIN)} />
-          <Button 
-            title="Modo Desenvolvedor (Pular Login)" 
-            variant="ghost" 
+          <Button
+            title="Modo Desenvolvedor (Pular Login)"
+            variant="ghost"
             onPress={() => {
-              // Salvar um usuário fake para não quebrar as telas que dependem de ID
               const fakeUser = { id: 999, nome: 'Dev User', username: 'dev@taskhub.com' };
-              import('../../services/api').then(m => {
-                import('expo-secure-store').then(ss => {
-                  ss.setItemAsync('user', JSON.stringify(fakeUser)).then(() => {
+              import('../../services/api').then(() => {
+                import('expo-secure-store').then((secureStore) => {
+                  secureStore.setItemAsync('user', JSON.stringify(fakeUser)).then(() => {
                     navigation.replace('App');
                   });
                 });
               });
-            }} 
+            }}
           />
         </View>
-
       </View>
     </ScreenContainer>
   );

@@ -211,7 +211,7 @@ export default function DashboardScreen({ navigation }) {
               </View>
               <Text style={styles.sectionTitle}>Importante hoje</Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate(ROUTES.TASKS)}>
+            <TouchableOpacity onPress={() => navigation.navigate(ROUTES.CALENDAR)}>
               <Text style={styles.seeAll}>Ver todas</Text>
             </TouchableOpacity>
           </View>

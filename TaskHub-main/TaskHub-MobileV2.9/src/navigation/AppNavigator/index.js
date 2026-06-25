@@ -6,13 +6,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import WelcomeScreen from '../../screens/Welcome';
 import LoginScreen from '../../screens/Login';
 // import RegisterScreen from '../../screens/Register';
 import DashboardScreen from '../../screens/Home';
-import TasksScreen from '../../screens/Tasks';
 import CalendarScreen from '../../screens/Calendar';
 import StatsScreen from '../../screens/Stats';
 import ProfileScreen from '../../screens/Profile';
@@ -27,13 +25,11 @@ const Drawer = createDrawerNavigator();
 
 const TAB_ICONS = {
   [ROUTES.DASHBOARD]: 'home',
-  [ROUTES.TASKS]: 'check-square',
   [ROUTES.CALENDAR]: 'calendar',
   [ROUTES.STATS]: 'bar-chart-2',
 };
 
 function TabNavigator() {
-  const { bottom } = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -46,8 +42,8 @@ function TabNavigator() {
         tabBarStyle: {
           backgroundColor: COLORS.white,
           borderTopColor: COLORS.border,
-          height: 72 + bottom,
-          paddingBottom: bottom,
+          height: 72,
+          paddingBottom: 0,
           elevation: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
@@ -67,7 +63,6 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name={ROUTES.DASHBOARD} component={DashboardScreen} options={{ title: 'Home' }} />
-      <Tab.Screen name={ROUTES.TASKS} component={TasksScreen} options={{ title: 'Tasks' }} />
       <Tab.Screen name={ROUTES.CALENDAR} component={CalendarScreen} options={{ title: 'Calendar' }} />
       <Tab.Screen name={ROUTES.STATS} component={StatsScreen} options={{ title: 'Stats' }} />
     </Tab.Navigator>

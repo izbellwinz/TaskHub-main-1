@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }) {
           />
           <Input
             label="Senha"
-            placeholder="••••••••"
+            placeholder="********"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -76,7 +76,7 @@ export default function LoginScreen({ navigation }) {
         </View>
 
         {/* <View style={styles.footer}>
-          <Text style={styles.footerText}>Ainda não tem conta? </Text>
+          <Text style={styles.footerText}>Ainda nao tem conta? </Text>
           <TouchableOpacity onPress={() => navigation.navigate(ROUTES.REGISTER)}>
             <Text style={styles.footerLink}>Criar conta</Text>
           </TouchableOpacity>

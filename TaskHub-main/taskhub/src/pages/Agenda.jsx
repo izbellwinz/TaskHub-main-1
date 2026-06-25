@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Agenda.css';
 import AgendaService from '../services/AgendaService';
+import TarefaService from '../services/TarefaService';
 import UsuarioService from '../services/UsuarioService';
 
 function Agenda({ darkTheme }) {
@@ -15,22 +16,68 @@ function Agenda({ darkTheme }) {
     return 'image/jpeg';
   };
 
+  const isChecklistItemCompleted = (status) => {
+    const normalized = String(status || '').toLowerCase();
+    return normalized === 'concluido' || normalized === 'concluida' || normalized === 'completed' || normalized === 'done';
+  };
+
+  const mapTaskToChecklistItem = (task) => ({
+    id: task.id,
+    text: task.descricao || '',
+    completed: isChecklistItemCompleted(task.statusTarefa),
+    statusTarefa: task.statusTarefa,
+  });
+
+  const mapAgendaToEvent = (agenda, checklist = []) => ({
+    id: agenda.id,
+    title: agenda.titulo,
+    date: agenda.dataAgenda,
+    time: agenda.hora,
+    description: agenda.descricao,
+    color: agenda.cor || '#1a73e8',
+    icon: '',
+    checklist,
+    image: agenda.arquivo ? `data:${inferImageMimeType(agenda.arquivo)};base64,${agenda.arquivo}` : null,
+    statusAgenda: agenda.statusAgenda,
+  });
+
+  const buildChecklistPayload = (agendaId, item) => ({
+    agendaId,
+    dataVencimento: null,
+    antecedenciaNotificacao: null,
+    descricao: item.text,
+    statusTarefa: item.completed ? 'concluido' : 'pendente',
+    cor: null,
+    arquivo: null,
+  });
+
+  const saveChecklistForEvent = async (agendaId, checklist = []) => {
+    const validItems = checklist.filter((item) => item.text && item.text.trim());
+    const savedItems = await Promise.all(validItems.map(async (item) => {
+      const payload = buildChecklistPayload(agendaId, item);
+      const response = item.id
+        ? await TarefaService.update(item.id, payload)
+        : await TarefaService.create(payload);
+
+      return mapTaskToChecklistItem(response.data);
+    }));
+
+    return savedItems;
+  };
+
   useEffect(() => {
     const user = UsuarioService.getCurrentUser();
     if (user) {
       AgendaService.findByUsuarioId(user.id)
-        .then((response) => {
-          const mapped = response.data.map(a => ({
-            id: a.id,
-            title: a.titulo,
-            date: a.dataAgenda,
-            time: a.hora,
-            description: a.descricao,
-            color: a.cor || '#1a73e8',
-            icon: '',
-            checklist: [],
-            image: a.arquivo ? `data:${inferImageMimeType(a.arquivo)};base64,${a.arquivo}` : null,
-            statusAgenda: a.statusAgenda,
+        .then(async (response) => {
+          const mapped = await Promise.all(response.data.map(async (agenda) => {
+            try {
+              const tasksResponse = await TarefaService.findByAgendaId(agenda.id);
+              return mapAgendaToEvent(agenda, tasksResponse.data.map(mapTaskToChecklistItem));
+            } catch (error) {
+              console.error(`Erro ao carregar checklist da agenda ${agenda.id}:`, error);
+              return mapAgendaToEvent(agenda);
+            }
           }));
           setEvents(mapped);
         })
@@ -93,13 +140,15 @@ function Agenda({ darkTheme }) {
 
       if (eventForm.id) {
         AgendaService.update(eventForm.id, data)
-          .then((response) => {
+          .then(async (response) => {
+            const checklist = await saveChecklistForEvent(response.data.id, eventForm.checklist);
             // Atualiza a lista com os dados retornados do servidor
             const updatedEvent = {
               ...eventForm,
               id: response.data.id,
               date: response.data.dataAgenda,
               time: response.data.hora,
+              checklist,
               image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
             };
             setEvents(events.map(e => e.id === eventForm.id ? updatedEvent : e));
@@ -111,13 +160,15 @@ function Agenda({ darkTheme }) {
           });
       } else {
         AgendaService.create(data)
-          .then((response) => {
+          .then(async (response) => {
+            const checklist = await saveChecklistForEvent(response.data.id, eventForm.checklist);
             // Adiciona o novo evento com o ID gerado pelo banco
             const newEvent = {
               ...eventForm,
               id: response.data.id,
               date: response.data.dataAgenda,
               time: response.data.hora,
+              checklist,
               image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
             };
             setEvents([...events, newEvent]);
@@ -188,6 +239,9 @@ function Agenda({ darkTheme }) {
   };
 
   const updateEventChecklistItem = (eventId, itemIndex, completed) => {
+    const eventToUpdate = events.find(event => event.id === eventId);
+    const itemToUpdate = eventToUpdate?.checklist?.[itemIndex];
+
     setEvents(events.map(event => {
       if (event.id === eventId) {
         const updatedChecklist = event.checklist.map((item, index) => index === itemIndex ? { ...item, completed } : item);
@@ -198,6 +252,11 @@ function Agenda({ darkTheme }) {
     if (selectedEvent && selectedEvent.id === eventId) {
       const updatedChecklist = selectedEvent.checklist.map((item, index) => index === itemIndex ? { ...item, completed } : item);
       setSelectedEvent({ ...selectedEvent, checklist: updatedChecklist });
+    }
+
+    if (itemToUpdate?.id) {
+      TarefaService.update(itemToUpdate.id, buildChecklistPayload(eventId, { ...itemToUpdate, completed }))
+        .catch(error => console.error('Erro ao atualizar item do checklist:', error));
     }
   };
 
