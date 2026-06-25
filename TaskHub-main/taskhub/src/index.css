@@ -103,6 +103,11 @@
   color: var(--text) !important;
 }
 
+.dark-theme .login-logo,
+.dark-theme .cadastro-logo {
+  color: var(--text) !important;
+}
+
 .dark-theme .login-header p,
 .dark-theme .cadastro-header p,
 .dark-theme .login-footer,
