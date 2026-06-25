@@ -185,12 +185,8 @@ const features = [
   },
 ];
 
-function Home({ setCurrentPage, darkTheme, setDarkTheme }) {
+function Home({ setCurrentPage }) {
   const [showSplash, setShowSplash] = useState(true);
-
-  const handleThemeToggle = () => {
-    setDarkTheme(!darkTheme);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -225,18 +221,6 @@ function Home({ setCurrentPage, darkTheme, setDarkTheme }) {
         </div>
       )}
       <div className={showSplash ? 'home hidden' : `home`}>
-      <button
-        className={`home-theme-toggle ${darkTheme ? 'active' : ''}`}
-        onClick={handleThemeToggle}
-        type="button"
-        aria-label={darkTheme ? 'Ativar modo claro' : 'Ativar modo escuro'}
-        title={darkTheme ? 'Modo claro' : 'Modo escuro'}
-      >
-        <span className="home-theme-toggle-track">
-          <span className="home-theme-toggle-thumb"></span>
-        </span>
-        <span className="home-theme-toggle-label">{darkTheme ? 'Claro' : 'Escuro'}</span>
-      </button>
 
       {/* Hero */}
       <section className="hero">
