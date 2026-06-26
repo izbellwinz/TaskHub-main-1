@@ -176,7 +176,7 @@ function Perfil({ darkTheme }) {
 
             <div className="perfil-actions">
               <button className="perfil-forgot-link" type="button" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
-              <button className="save-btn" onClick={handleSavePersonalData}>Salvar alteracoes</button>
+              <button className="save-btn" onClick={handleSavePersonalData}>Salvar alterações</button>
             </div>
           </div>
         </section>
@@ -184,7 +184,7 @@ function Perfil({ darkTheme }) {
 
       <footer className="perfil-footer">
         <div className="perfil-footer-inner">
-          <span>© 2026 Marco</span>
+          <span>© 2026 Taskhub</span>
           <span>Feito para quem cuida do proprio tempo.</span>
         </div>
       </footer>

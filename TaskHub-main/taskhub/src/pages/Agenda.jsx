@@ -383,6 +383,26 @@ function Agenda({ darkTheme }) {
       </header>
 
       <div className="agenda-page">
+      <aside className="agenda-sidebar">
+        <div className="agenda-sidebar-label">Menu</div>
+        <button className="agenda-sidebar-item" type="button" onClick={() => window.location.href = '/?page=dashboard'}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><rect x="1" y="1" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /></svg>
+          Home
+        </button>
+        <button className="agenda-sidebar-item active" type="button" onClick={() => window.location.href = '/?page=agenda'}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><rect x="1.5" y="2" width="12" height="11.5" rx="1.8" stroke="currentColor" strokeWidth="1.35" /><path d="M5 1v2.5M10 1v2.5M1.5 6.5h12" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>
+          Agenda
+        </button>
+        <button className="agenda-sidebar-item" type="button" onClick={() => window.location.href = '/?page=perfil'}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="5" r="2.8" stroke="currentColor" strokeWidth="1.35" /><path d="M1.5 13c0-2.485 2.686-4.5 6-4.5s6 2.015 6 4.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>
+          Perfil
+        </button>
+        <div className="agenda-sidebar-divider"></div>
+        <button className="agenda-sidebar-item danger" type="button" onClick={() => window.location.href = '/?page=home'}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M5.5 2H3a1 1 0 00-1 1v9a1 1 0 001 1h2.5M9.5 10.5l3-3-3-3M12.5 7.5H5.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          Sair
+        </button>
+      </aside>
       <div className="calendar">
         <div className="calendar-header">
           <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
