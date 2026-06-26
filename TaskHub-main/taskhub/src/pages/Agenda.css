@@ -2631,6 +2631,211 @@
   filter: none;
 }
 
+/* Marco event details */
+.agenda-container .event-details {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 48px);
+  overflow: hidden auto;
+  border-radius: 18px;
+  background: var(--branco);
+  border: 0;
+  box-shadow: 0 24px 64px rgba(10, 26, 51, 0.18), 0 2px 8px rgba(10, 26, 51, 0.08);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+}
+
+.agenda-container .event-details .details-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 24px 0;
+  background: transparent;
+  border: 0;
+  min-width: 0;
+}
+
+.agenda-container .event-details .event-color {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--linha-forte);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.agenda-container .event-details .event-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--texto-primario);
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agenda-container .event-details .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.agenda-container .event-details .edit-btn,
+.agenda-container .event-details .delete-btn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 7px;
+  box-shadow: none;
+  transform: none;
+}
+
+.agenda-container .event-details .edit-btn {
+  background: var(--azul-acento-tinta);
+  color: var(--azul-acento);
+  border: 1px solid var(--azul-acento);
+}
+
+.agenda-container .event-details .edit-btn:hover {
+  background: #E3EBFC;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+.agenda-container .event-details .delete-btn {
+  background: #FDECEA;
+  color: #9B2A22;
+  border: 1px solid rgba(217, 66, 53, 0.2);
+}
+
+.agenda-container .event-details .delete-btn:hover {
+  background: #F9DDDA;
+  transform: none;
+}
+
+.agenda-container .event-details .close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--linha-forte);
+  background: var(--branco);
+  color: var(--texto-secundario);
+  font-size: 16px;
+  padding: 0;
+  box-shadow: none;
+}
+
+.agenda-container .event-details .close-btn:hover {
+  background: var(--painel-claro);
+  color: var(--texto-primario);
+  transform: none;
+}
+
+.agenda-container .event-details .details-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agenda-container .event-details .detail-item {
+  position: relative;
+  margin: 0;
+  padding: 12px 14px 12px 18px;
+  background: transparent;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.agenda-container .event-details .detail-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--azul-acento);
+}
+
+.agenda-container .event-details .detail-label {
+  margin: 0 0 6px;
+  color: var(--texto-secundario);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.agenda-container .event-details .detail-value,
+.agenda-container .event-details .detail-description {
+  color: var(--texto-primario);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.agenda-container .event-details .detail-description {
+  margin: 0;
+}
+
+.agenda-container .event-details .detail-checklist {
+  gap: 0;
+  border-top: 1px solid var(--linha);
+  margin: 8px -14px -12px -18px;
+}
+
+.agenda-container .event-details .checklist-detail-item {
+  gap: 8px;
+  padding: 8px 14px 8px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--linha);
+  border-radius: 0;
+  background: transparent;
+  color: var(--texto-primario);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.agenda-container .event-details .checklist-detail-item:last-child {
+  border-bottom: 0;
+}
+
+.agenda-container .event-details .detail-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--azul-acento);
+}
+
+.agenda-container .event-details .detail-image {
+  max-height: 150px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.agenda-container .event-preview {
+  color: #0C447C;
+}
+
+.agenda-container .color-options {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.agenda-container .color-option,
+.agenda-container .event-color-dot {
+  border-color: rgba(10, 26, 51, 0.14);
+  box-shadow: none;
+}
+
+.agenda-container .color-option:hover {
+  box-shadow: none;
+}
+
 @media (max-width: 760px) {
   .agenda-container .event-overlay {
     padding: 16px;
@@ -2638,15 +2843,24 @@
   }
 
   .agenda-container .event-form {
+    max-height: calc(100vh - 32px);
     max-width: 100%;
     border-radius: 14px;
   }
 
-  .agenda-container .event-form .form-header {
+  .agenda-container .event-details {
+    max-height: calc(100vh - 32px);
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .agenda-container .event-form .form-header,
+  .agenda-container .event-details .details-header {
     padding: 18px 18px 0;
   }
 
-  .agenda-container .event-form .form-body {
+  .agenda-container .event-form .form-body,
+  .agenda-container .event-details .details-body {
     padding: 16px 18px;
   }
 

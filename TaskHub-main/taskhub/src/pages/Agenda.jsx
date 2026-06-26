@@ -34,7 +34,7 @@ function Agenda({ darkTheme }) {
     date: agenda.dataAgenda,
     time: agenda.hora,
     description: agenda.descricao,
-    color: agenda.cor || '#00193a',
+    color: agenda.cor || '#DCE8FB',
     icon: '',
     checklist,
     image: agenda.arquivo ? `data:${inferImageMimeType(agenda.arquivo)};base64,${agenda.arquivo}` : null,
@@ -90,30 +90,30 @@ function Agenda({ darkTheme }) {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [eventForm, setEventForm] = useState({
-    title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#1a73e8', icon: ''
+    title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#DCE8FB', icon: ''
   });
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, eventId: null });
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const eventColors = {
-    purple: '#c684d1ff',
-    violet: '#8b5cf6',
-    pink: '#e961ddff',
-    rose: '#fb7185',
-    blue: '#7badeeff',
-    sky: '#38bdf8',
-    cyan: '#22d3ee',
-    teal: '#2dd4bf',
-    green: '#87ec8cff',
-    emerald: '#34d399',
-    lime: '#a3e635',
-    yellow: '#ffc15eff',
-    amber: '#f59e0b',
-    orange: '#f0a739ff',
-    red: '#f35b5bff',
-    slate: '#64748b'
+    blue: '#DCE8FB',
+    soft: '#EEF2FA',
+    green: '#E2F5EE',
+    red: '#FDECEA',
   };
+
+  const eventTextColors = {
+    '#DCE8FB': '#0C447C',
+    '#EEF2FA': '#3A5080',
+    '#E2F5EE': '#136843',
+    '#FDECEA': '#9B2A22',
+  };
+
+  const getEventStyle = (color) => ({
+    backgroundColor: color || eventColors.blue,
+    color: eventTextColors[color] || '#0C447C',
+  });
 
   const handleAddEvent = () => {
     if (eventForm.title && eventForm.date) {
@@ -133,7 +133,7 @@ function Agenda({ darkTheme }) {
         hora: formattedTime,
         descricao: eventForm.description,
         statusAgenda: 'ativo',
-        cor: eventForm.color || '#1a73e8',
+        cor: eventForm.color || '#DCE8FB',
         arquivo: eventForm.image ? eventForm.image.split(',')[1] : null,
       };
 
@@ -179,7 +179,7 @@ function Agenda({ darkTheme }) {
           });
       }
       // Resetar formulário após sucesso ou tentar novamente
-      setEventForm({ title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#1a73e8', icon: '' });
+      setEventForm({ title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#DCE8FB', icon: '' });
     } else {
       alert('Por favor, preencha o título e a data.');
     }
@@ -400,7 +400,7 @@ function Agenda({ darkTheme }) {
                   <div
                     key={event.id}
                     className="event-preview"
-                    style={{ backgroundColor: event.color || '#1a73e8' }}
+                    style={getEventStyle(event.color)}
                     onClick={(e) => handleEventClick(e, event)}
                     onContextMenu={(e) => handleEventRightClick(e, event.id)}
                   >
@@ -442,7 +442,7 @@ function Agenda({ darkTheme }) {
               <div className="event-color-row">
                 <span className="event-section-label">Cor</span>
                 <div className="event-color-dots">
-                  {["#2F5FD8", "#1A9B6C", "#D94235", "#8A9EC2"].map((color) => (
+                  {Object.values(eventColors).map((color) => (
                     <button
                       key={color}
                       type="button"
@@ -507,7 +507,7 @@ function Agenda({ darkTheme }) {
         <div className="event-overlay">
           <div className="event-details">
             <div className="details-header">
-              <div className="event-color" style={{ backgroundColor: selectedEvent.color || '#1a73e8' }}></div>
+              <div className="event-color" style={{ backgroundColor: selectedEvent.color || '#DCE8FB' }}></div>
               <h2 className="event-title">{selectedEvent.title}</h2>
               <div className="header-actions">
                 <button className="edit-btn" onClick={editEvent}>Editar</button>

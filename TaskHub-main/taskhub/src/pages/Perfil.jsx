@@ -5,7 +5,6 @@ import UsuarioService from '../services/UsuarioService';
 function Perfil({ darkTheme }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
   const [activeSection, setActiveSection] = useState('dados');
   const [userData, setUserData] = useState({ nome: '', email: '' });
   const [showForgot, setShowForgot] = useState(false);
@@ -34,7 +33,7 @@ function Perfil({ darkTheme }) {
       nome: userData.nome,
       email: userData.email,
       senha: user.senha,
-      foto: foto || ''
+      foto: foto || '',
     })
       .then((response) => {
         updateCurrentUser({ ...user, ...response.data });
@@ -79,7 +78,7 @@ function Perfil({ darkTheme }) {
       return;
     }
     if (forgotData.novaSenha !== forgotData.confirmarSenha) {
-      setForgotError('As senhas não coincidem.');
+      setForgotError('As senhas nao coincidem.');
       return;
     }
     const user = UsuarioService.getCurrentUser();
@@ -102,86 +101,93 @@ function Perfil({ darkTheme }) {
 
   return (
     <div className={`perfil-container ${darkTheme ? 'dark-theme' : ''}`}>
-      <button className={`menu-toggle ${showSidebar ? 'open' : ''}`} onClick={() => setShowSidebar(!showSidebar)}>
-        ☰
-      </button>
+      <header className="perfil-site-header">
+        <nav className="perfil-nav">
+          <button className="perfil-logo" type="button" onClick={() => window.location.href = '/?page=dashboard'}>
+            <span className="perfil-logo-mark" aria-hidden="true"></span>
+            Taskhub
+          </button>
+        </nav>
+      </header>
 
-      <div className={`sidebar ${showSidebar ? 'show' : ''}`}>
-        <div className="sidebar-content">
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=dashboard'}>
-            <div className="sidebar-label">Home</div>
-          </div>
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=agenda'}>
-            <div className="sidebar-label">Agenda</div>
-          </div>
-          <div className={`sidebar-item ${activeSection === 'dados' ? 'active' : ''}`} onClick={() => setActiveSection('dados')}>
-            <div className="sidebar-label">Dados pessoais</div>
-          </div>
-          <div className="sidebar-item" onClick={() => window.location.href = '/?page=home'}>
-            <div className="sidebar-label">Sair</div>
-          </div>
-        </div>
-      </div>
+      <main className="perfil-layout">
+        <aside className="perfil-sidebar">
+          <div className="perfil-sidebar-label">Menu</div>
+          <button className="perfil-sidebar-item" type="button" onClick={() => window.location.href = '/?page=dashboard'}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><rect x="1" y="1" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.35" /></svg>
+            Home
+          </button>
+          <button className="perfil-sidebar-item" type="button" onClick={() => window.location.href = '/?page=agenda'}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><rect x="1.5" y="2" width="12" height="11.5" rx="1.8" stroke="currentColor" strokeWidth="1.35" /><path d="M5 1v2.5M10 1v2.5M1.5 6.5h12" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>
+            Agenda
+          </button>
+          <button className={`perfil-sidebar-item ${activeSection === 'dados' ? 'active' : ''}`} type="button" onClick={() => setActiveSection('dados')}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="5" r="2.8" stroke="currentColor" strokeWidth="1.35" /><path d="M1.5 13c0-2.485 2.686-4.5 6-4.5s6 2.015 6 4.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>
+            Perfil
+          </button>
+          <div className="perfil-sidebar-divider"></div>
+          <button className="perfil-sidebar-item danger" type="button" onClick={() => window.location.href = '/?page=home'}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M5.5 2H3a1 1 0 00-1 1v9a1 1 0 001 1h2.5M9.5 10.5l3-3-3-3M12.5 7.5H5.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            Sair
+          </button>
+        </aside>
 
-      <main className={`perfil-content ${showSidebar ? 'sidebar-open' : ''}`}>
-        <section className="perfil-card">
-          <div className="perfil-hero">
-            <div className="perfil-avatar">
-              <div className="avatar-circle" onClick={() => setShowPhotoOptions(true)}>
-                {profilePhoto ? (
-                  <img src={profilePhoto} alt="Foto de perfil" className="profile-image" />
-                ) : (
-                  <span>{userData.nome.charAt(0).toUpperCase()}</span>
-                )}
+        <section className="perfil-content">
+          <div className="perfil-avatar-card">
+            <div className="avatar-circle" onClick={() => setShowPhotoOptions(true)}>
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="Foto de perfil" className="profile-image" />
+              ) : (
+                <span>{(userData.nome || 'U').charAt(0).toUpperCase()}</span>
+              )}
+              <div className="avatar-overlay" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 13.5V16h2.5l7.372-7.372-2.5-2.5L2 13.5z" fill="white" /><path d="M15.71 4.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="white" /></svg>
               </div>
-              <button className="photo-action" type="button" onClick={() => setShowPhotoOptions(true)}>
-                Alterar foto
-              </button>
             </div>
-
-            <div className="perfil-info">
-              <span className="perfil-kicker">Meu perfil</span>
-              <h2>{userData.nome || 'Usuário'}</h2>
-              <p>{userData.email || 'usuario@email.com'}</p>
-            </div>
-
+            <h2 className="perfil-avatar-name">{userData.nome || 'Usuario'}</h2>
+            <p className="perfil-avatar-email">{userData.email || 'usuario@email.com'}</p>
+            <button className="photo-action" type="button" onClick={() => setShowPhotoOptions(true)}>
+              Alterar foto
+            </button>
           </div>
 
           {showPhotoOptions && (
             <div className="photo-options-overlay" onClick={() => setShowPhotoOptions(false)}>
               <div className="photo-options-menu" onClick={(e) => e.stopPropagation()}>
-                <div className="photo-option" onClick={handleChangePhoto}>Alterar foto</div>
-                <div className="photo-option" onClick={() => { saveProfilePhoto(null); setShowPhotoOptions(false); }}>Remover foto</div>
+                <button className="photo-option" type="button" onClick={handleChangePhoto}>Alterar foto</button>
+                <button className="photo-option" type="button" onClick={() => { saveProfilePhoto(null); setShowPhotoOptions(false); }}>Remover foto</button>
               </div>
             </div>
           )}
 
-          <div className="perfil-panel">
-            <div className="panel-header">
-              <div>
-                <h3>Dados pessoais</h3>
-                <p>Mantenha suas informações principais atualizadas.</p>
-              </div>
-            </div>
+          <div className="perfil-form-card">
+            <h3 className="perfil-form-title">Dados pessoais</h3>
 
             <div className="perfil-fields">
               <div className="field-group">
                 <label>Nome</label>
-                <input type="text" value={userData.nome} onChange={(e) => setUserData({ ...userData, nome: e.target.value })} />
+                <input type="text" placeholder="Seu nome completo" value={userData.nome} onChange={(e) => setUserData({ ...userData, nome: e.target.value })} />
               </div>
               <div className="field-group">
                 <label>Email</label>
-                <input type="email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
-                <button className="perfil-forgot-link" type="button" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
+                <input type="email" placeholder="seu@email.com" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
               </div>
             </div>
 
             <div className="perfil-actions">
-              <button className="save-btn" onClick={handleSavePersonalData}>Salvar alterações</button>
+              <button className="perfil-forgot-link" type="button" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
+              <button className="save-btn" onClick={handleSavePersonalData}>Salvar alteracoes</button>
             </div>
           </div>
         </section>
       </main>
+
+      <footer className="perfil-footer">
+        <div className="perfil-footer-inner">
+          <span>© 2026 Marco</span>
+          <span>Feito para quem cuida do proprio tempo.</span>
+        </div>
+      </footer>
 
       {showForgot && (
         <div className="forgot-overlay" onClick={closeForgot}>
