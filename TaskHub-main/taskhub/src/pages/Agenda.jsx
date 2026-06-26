@@ -434,8 +434,24 @@ function Agenda({ darkTheme }) {
                 <div className="field-content">
                   <div className="datetime-row">
                     <input type="date" value={eventForm.date} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} className="date-input" />
+                    <div className="field-divider" aria-hidden="true"></div>
                     <input type="time" value={eventForm.time} onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })} className="time-input" />
                   </div>
+                </div>
+              </div>
+              <div className="event-color-row">
+                <span className="event-section-label">Cor</span>
+                <div className="event-color-dots">
+                  {["#2F5FD8", "#1A9B6C", "#D94235", "#8A9EC2"].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`event-color-dot ${eventForm.color === color ? 'selected' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setEventForm({ ...eventForm, color })}
+                      aria-label={`Selecionar cor ${color}`}
+                    />
+                  ))}
                 </div>
               </div>
               <div className="form-field">

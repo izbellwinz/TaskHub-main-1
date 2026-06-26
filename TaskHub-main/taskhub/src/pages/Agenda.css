@@ -2297,3 +2297,360 @@
   }
 }
 
+
+/* Marco event modal */
+.agenda-container .event-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 26, 51, 0.38);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.agenda-container .event-form {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 48px);
+  overflow: hidden auto;
+  border-radius: 18px;
+  background: var(--branco);
+  border: 0;
+  box-shadow: 0 24px 64px rgba(10, 26, 51, 0.18), 0 2px 8px rgba(10, 26, 51, 0.08);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+}
+
+.agenda-container .event-form .form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 24px 0;
+  background: transparent;
+  border: 0;
+}
+
+.agenda-container .event-form .title-input {
+  width: 100%;
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--texto-primario);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0;
+  letter-spacing: 0;
+}
+
+.agenda-container .event-form .title-input::placeholder,
+.agenda-container .event-form .description-input::placeholder,
+.agenda-container .event-form .checklist-text::placeholder {
+  color: #B4BECE;
+}
+
+.agenda-container .event-form .close-btn {
+  width: 30px;
+  height: 30px;
+  margin-left: 0;
+  border-radius: 50%;
+  border: 1px solid var(--linha-forte);
+  background: var(--branco);
+  color: var(--texto-secundario);
+  font-size: 16px;
+  flex-shrink: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.agenda-container .event-form .close-btn:hover {
+  background: var(--painel-claro);
+  color: var(--texto-primario);
+  transform: none;
+}
+
+.agenda-container .event-form .form-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agenda-container .event-form .form-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.agenda-container .event-form .form-field:focus-within {
+  border-color: var(--linha-forte);
+  box-shadow: none;
+}
+
+.agenda-container .event-form .field-icon {
+  width: 4px;
+  height: auto;
+  min-height: 48px;
+  margin: 0;
+  border-radius: 0;
+  background: var(--azul-acento);
+}
+
+.agenda-container .event-form .field-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.agenda-container .event-form .datetime-row,
+.agenda-container .event-form .checklist-header,
+.agenda-container .event-form .attachment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 14px;
+  margin: 0;
+}
+
+.agenda-container .event-form .field-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--linha);
+  margin: 0;
+}
+
+.agenda-container .event-form .date-input,
+.agenda-container .event-form .time-input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--texto-primario);
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.agenda-container .event-form .date-input:focus,
+.agenda-container .event-form .time-input:focus {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.agenda-container .event-color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 10px 14px;
+  margin-top: -12px;
+  border: 1px solid var(--linha);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+.agenda-container .event-form .form-field:has(.datetime-row) {
+  border-radius: 10px 10px 0 0;
+}
+
+.agenda-container .event-section-label,
+.agenda-container .event-form .checklist-header span,
+.agenda-container .event-form .attachment-header span {
+  flex: 1;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.agenda-container .event-color-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.agenda-container .event-color-dot {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.agenda-container .event-color-dot:hover,
+.agenda-container .event-color-dot.selected {
+  transform: scale(1.15);
+}
+
+.agenda-container .event-color-dot.selected {
+  border-color: var(--texto-primario);
+}
+
+.agenda-container .event-form .description-input {
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 14px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  color: var(--texto-primario);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.agenda-container .event-form .description-input:focus {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 12px 14px;
+}
+
+.agenda-container .event-form .add-item-btn,
+.agenda-container .event-form .file-upload-btn {
+  border-radius: 7px;
+  border: 1px solid var(--linha-forte);
+  background: var(--branco);
+  color: var(--texto-secundario);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.agenda-container .event-form .add-item-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  padding: 0;
+}
+
+.agenda-container .event-form .file-upload-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.agenda-container .event-form .add-item-btn:hover,
+.agenda-container .event-form .file-upload-btn:hover {
+  background: var(--azul-acento-tinta);
+  border-color: var(--azul-acento);
+  color: var(--azul-acento);
+}
+
+.agenda-container .event-form .checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin: 0;
+  border-top: 1px solid var(--linha);
+}
+
+.agenda-container .event-form .checklist-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--azul-acento);
+  cursor: pointer;
+}
+
+.agenda-container .event-form .checklist-text {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--texto-primario);
+  border-radius: 0;
+  padding: 0;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.agenda-container .event-form .checklist-text:focus {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.agenda-container .event-form .attachment-preview {
+  margin: 0;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--linha);
+}
+
+.agenda-container .event-form .image-preview {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.agenda-container .event-form .form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 22px;
+  border: 0;
+  background: transparent;
+}
+
+.agenda-container .event-form .save-btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--azul-meia-noite);
+  color: var(--branco);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.13s;
+}
+
+.agenda-container .event-form .save-btn:hover {
+  background: #162d55;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+@media (max-width: 760px) {
+  .agenda-container .event-overlay {
+    padding: 16px;
+    align-items: center;
+  }
+
+  .agenda-container .event-form {
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .agenda-container .event-form .form-header {
+    padding: 18px 18px 0;
+  }
+
+  .agenda-container .event-form .form-body {
+    padding: 16px 18px;
+  }
+
+  .agenda-container .event-form .form-footer {
+    padding: 0 18px 18px;
+  }
+}
