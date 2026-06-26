@@ -283,14 +283,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
               <div className="settings-section">
                 <h3>Privacidade</h3>
                 <div className="privacy-item">
-                  <label>Mostrar email</label>
-                  <input
-                    type="checkbox"
-                    checked={configuracao?.mostrarEmail || false}
-                    onChange={(e) => {
-                      saveConfiguracao({ mostrarEmail: e.target.checked });
-                    }}
-                  />
+                  
                 </div>
                 <div className="privacy-item">
                   <label>Receber notificações</label>
