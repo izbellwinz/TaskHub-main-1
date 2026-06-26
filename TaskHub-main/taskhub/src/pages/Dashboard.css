@@ -499,13 +499,13 @@
 .event-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.58);
+  background: rgba(10, 26, 51, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   padding: 24px;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(2px);
 }
 
 .settings-modal,
@@ -521,7 +521,8 @@
 }
 
 .settings-modal {
-  max-width: 520px;
+  max-width: 440px;
+  box-shadow: 0 40px 80px -24px rgba(10, 26, 51, 0.35);
 }
 
 .notifications-modal {
@@ -543,12 +544,24 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 }
 
+.settings-header {
+  padding: 24px 26px 18px;
+  border-bottom: 1px solid var(--linha);
+}
+
 .settings-header h2,
 .notifications-header h2 {
   font-size: 1.35rem;
   font-weight: 700;
   color: #111827;
   margin: 0;
+}
+
+.settings-header h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .dashboard-container.dark-theme .settings-header h2,
@@ -568,52 +581,148 @@
   height: 36px;
 }
 
+.settings-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--painel-claro);
+  color: var(--texto-secundario);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.settings-close:hover {
+  background: #DCE4F1;
+  color: var(--texto-primario);
+}
+
 .settings-body,
 .notifications-body {
   padding: 20px 28px 28px;
 }
 
+.settings-body {
+  padding: 22px 26px 26px;
+}
+
 .settings-section {
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
-.settings-section h3 {
-  font-size: 0.7rem;
+.settings-section + .settings-section {
+  margin-top: 26px;
+}
+
+.settings-section-label {
+  font-size: 11.5px;
   font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #64748b;
-  margin: 0 0 1.2rem;
+  color: var(--azul-acento);
+  margin-bottom: 14px;
 }
 
+.setting-row,
 .setting-item,
 .privacy-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-  font-size: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--linha);
+  font-size: 14.5px;
   color: #111827;
+}
+
+.setting-row:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.setting-row label {
+  font-size: 14.5px;
+  color: var(--texto-primario);
+  margin: 0;
 }
 
 .dashboard-container.dark-theme .setting-item,
 .dashboard-container.dark-theme .privacy-item,
 .dashboard-container.dark-theme .setting-item label,
-.dashboard-container.dark-theme .privacy-item label {
+.dashboard-container.dark-theme .privacy-item label,
+.dashboard-container.dark-theme .setting-row,
+.dashboard-container.dark-theme .setting-row label {
   color: #ffffff;
 }
 
+.select-tema,
 .setting-select {
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 10px;
-  padding: 8px 12px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--linha-forte);
   font-size: 14px;
   color: #111827;
-  background: #f8fafc;
+  background: var(--branco);
   outline: none;
   cursor: pointer;
   font-family: inherit;
+  min-width: 110px;
+}
+
+.select-tema:focus,
+.setting-select:focus {
+  border-color: var(--azul-acento);
+  box-shadow: 0 0 0 3px rgba(47, 95, 216, 0.14);
+}
+
+.settings-switch {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.settings-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.settings-switch .track {
+  position: absolute;
+  inset: 0;
+  background: var(--linha-forte);
+  border-radius: 20px;
+  transition: background 0.15s ease;
+}
+
+.settings-switch .thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--branco);
+  box-shadow: 0 1px 3px rgba(10, 26, 51, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.settings-switch input:checked + .track {
+  background: var(--azul-acento);
+}
+
+.settings-switch input:checked ~ .thumb {
+  transform: translateX(16px);
 }
 
 .privacy-item input[type="checkbox"] {

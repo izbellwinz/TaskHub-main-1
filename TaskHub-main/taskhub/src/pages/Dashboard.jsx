@@ -257,16 +257,18 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
           <div className="settings-modal">
             <div className="settings-header">
               <h2>Configurações</h2>
-              <button className="close-btn" onClick={() => setShowSettings(false)} type="button">x</button>
+              <button className="settings-close" onClick={() => setShowSettings(false)} type="button" aria-label="Fechar">
+                x
+              </button>
             </div>
 
             <div className="settings-body">
               <div className="settings-section">
-                <h3>Preferências</h3>
-                <div className="setting-item">
+                <div className="settings-section-label">Preferências</div>
+                <div className="setting-row">
                   <label>Tema:</label>
                   <select
-                    className="setting-select"
+                    className="select-tema"
                     value={darkTheme ? 'dark' : 'light'}
                     onChange={(e) => {
                       const isDark = e.target.value === 'dark';
@@ -281,19 +283,20 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
               </div>
 
               <div className="settings-section">
-                <h3>Privacidade</h3>
-                <div className="privacy-item">
-                  
-                </div>
-                <div className="privacy-item">
+                <div className="settings-section-label">Privacidade</div>
+                <div className="setting-row">
                   <label>Receber notificações</label>
-                  <input
-                    type="checkbox"
-                    checked={configuracao?.receberEmail !== false}
-                    onChange={(e) => {
-                      saveConfiguracao({ receberEmail: e.target.checked });
-                    }}
-                  />
+                  <span className="settings-switch">
+                    <input
+                      type="checkbox"
+                      checked={configuracao?.receberEmail !== false}
+                      onChange={(e) => {
+                        saveConfiguracao({ receberEmail: e.target.checked });
+                      }}
+                    />
+                    <span className="track"></span>
+                    <span className="thumb"></span>
+                  </span>
                 </div>
               </div>
             </div>
