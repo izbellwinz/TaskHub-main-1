@@ -41,6 +41,18 @@ public class Agenda {
     @Column(name = "cor", length = 20, nullable = true)
     private String cor;
 
+    @Column(name = "notificar", nullable = false)
+    private Boolean notificar = true;
+
+    @Column(name = "antecedenciaNotificacao", nullable = false)
+    private Integer antecedenciaNotificacao = 30;
+
+    @Column(name = "googleEventId", length = 255, nullable = true)
+    private String googleEventId;
+
+    @Column(name = "sincronizadoGoogle", nullable = false)
+    private Boolean sincronizadoGoogle = false;
+
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
@@ -126,5 +138,42 @@ public class Agenda {
 
     public void setCor(String cor) {
         this.cor = cor;
+    }
+
+    public Boolean getNotificar() {
+        return notificar;
+    }
+
+    public void setNotificar(Boolean notificar) {
+        this.notificar = notificar != null ? notificar : true;
+    }
+
+    public Integer getAntecedenciaNotificacao() {
+        return antecedenciaNotificacao;
+    }
+
+    public void setAntecedenciaNotificacao(Integer antecedenciaNotificacao) {
+        if (antecedenciaNotificacao == null) {
+            this.antecedenciaNotificacao = 30;
+            return;
+        }
+
+        this.antecedenciaNotificacao = Math.max(0, Math.min(60, antecedenciaNotificacao));
+    }
+
+    public String getGoogleEventId() {
+        return googleEventId;
+    }
+
+    public void setGoogleEventId(String googleEventId) {
+        this.googleEventId = googleEventId;
+    }
+
+    public Boolean getSincronizadoGoogle() {
+        return sincronizadoGoogle;
+    }
+
+    public void setSincronizadoGoogle(Boolean sincronizadoGoogle) {
+        this.sincronizadoGoogle = sincronizadoGoogle != null ? sincronizadoGoogle : false;
     }
 }

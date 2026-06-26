@@ -60,6 +60,10 @@ CREATE TABLE Agenda
  arquivo VARBINARY(MAX) NULL,
 	 statusAgenda VARCHAR(20) NOT NULL,
 	 cor VARCHAR(20) NULL,
+	 notificar BIT NOT NULL DEFAULT 1,
+	 antecedenciaNotificacao INT NOT NULL DEFAULT 30,
+	 googleEventId VARCHAR(255) NULL,
+	 sincronizadoGoogle BIT NOT NULL DEFAULT 0,
 	
 	 CONSTRAINT FK_Agenda_Usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 	);
@@ -152,8 +156,116 @@ VALUES ('Carlos Souza', 'carlos.souza@example.com', 'abc456', 'usuario', 'ativo'
 INSERT INTO Usuario (nome, email, senha, nivelAcesso, statusUsuario)
 VALUES ('Ana Costa', 'ana.costa@example.com', 'pass789', 'usuario', 'ativo');
 
+--SELECTS NOVOS
+
+-- Verificar em qual banco você está
 SELECT DB_NAME() AS BancoAtual;
-SELECT * FROM Usuario;
-SELECT id, nome, email FROM Usuario;
-SELECT id FROM Usuario;
-SELECT email, dataCadastro FROM Usuario;
+GO
+
+-- Listar todos os usuários cadastrados
+SELECT
+    id,
+    nome,
+    email,
+    nivelAcesso,
+    statusUsuario,
+    dataCadastro,
+    dataAtualizacao
+FROM Usuario
+ORDER BY id;
+GO
+
+-- Verificar somente usuários ativos
+SELECT
+    id,
+    nome,
+    email,
+    nivelAcesso,
+    statusUsuario
+FROM Usuario
+WHERE statusUsuario = 'ativo'
+ORDER BY nome;
+GO
+
+-- Verificar quantidade de usuários cadastrados
+SELECT
+    COUNT(*) AS TotalUsuarios
+FROM Usuario;
+GO
+
+-- Listar agendas com o nome do usuário
+SELECT
+    A.id AS agendaId,
+    U.nome AS usuario,
+    U.email,
+    A.titulo,
+    A.descricao,
+    A.dataAgenda,
+    A.hora,
+    A.statusAgenda,
+    A.cor
+FROM Agenda A
+INNER JOIN Usuario U ON A.usuario_id = U.id
+ORDER BY A.dataAgenda, A.hora;
+GO
+
+-- Listar tarefas com agenda e usuário
+SELECT
+    T.id AS tarefaId,
+    U.nome AS usuario,
+    A.titulo AS agenda,
+    T.descricao AS tarefa,
+    T.dataVencimento,
+    T.antecedenciaNotificacao,
+    T.statusTarefa,
+    T.cor
+FROM Tarefa T
+INNER JOIN Agenda A ON T.agenda_id = A.id
+INNER JOIN Usuario U ON A.usuario_id = U.id
+ORDER BY T.dataVencimento;
+GO
+
+-- Listar configurações dos usuários
+SELECT
+    C.id AS configuracaoId,
+    U.nome AS usuario,
+    U.email,
+    C.primeiroDiaSemana,
+    C.formatoHora,
+    C.tema,
+    C.mostrarEmail,
+    C.receberEmail
+FROM Configuracao C
+INNER JOIN Usuario U ON C.usuario_id = U.id
+ORDER BY U.nome;
+GO
+
+-- Listar notificações com usuário e tarefa
+SELECT
+    N.id AS notificacaoId,
+    U.nome AS usuario,
+    T.descricao AS tarefa,
+    N.mensagem,
+    N.dataEnvio,
+    N.lida,
+    N.statusNotificacao
+FROM Notificacao N
+INNER JOIN Usuario U ON N.usuario_id = U.id
+INNER JOIN Tarefa T ON N.tarefa_id = T.id
+ORDER BY N.dataEnvio DESC;
+GO
+
+-- Listar contatos enviados pelos usuários
+SELECT
+    C.id AS contatoId,
+    U.nome AS usuario,
+    C.nome AS nomeContato,
+    C.email AS emailContato,
+    C.assunto,
+    C.dataEnvio
+FROM Contato C
+INNER JOIN Usuario U ON C.usuario_id = U.id
+ORDER BY C.dataEnvio DESC;
+GO
+
+---------------------

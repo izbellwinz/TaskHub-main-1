@@ -1938,6 +1938,20 @@
   flex-direction: column;
 }
 
+.agenda-container.dark-theme {
+  --azul-meia-noite: #101827;
+  --azul-acento: #8EA2FF;
+  --azul-acento-hover: #A7B6FF;
+  --azul-acento-tinta: rgba(142, 162, 255, 0.16);
+  --branco: #151B27;
+  --branco-azulado: #1D2533;
+  --painel-claro: #202A3A;
+  --texto-primario: #F8FAFC;
+  --texto-secundario: #CBD5E1;
+  --linha: rgba(226, 232, 240, 0.12);
+  --linha-forte: rgba(226, 232, 240, 0.20);
+}
+
 .agenda-container *,
 .agenda-container *::before,
 .agenda-container *::after {
@@ -2102,6 +2116,43 @@
 
 .agenda-btn-new:hover {
   background: var(--azul-acento-hover);
+}
+
+.agenda-google-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.agenda-btn-google {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--linha-forte);
+  background: var(--branco);
+  color: var(--texto-primario);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+
+.agenda-btn-google:hover {
+  background: var(--azul-acento-tinta);
+  border-color: var(--azul-acento);
+  color: var(--azul-acento);
+}
+
+.agenda-google-status {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--texto-secundario);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .agenda-page {
@@ -2357,6 +2408,14 @@
 
   .agenda-btn-new span {
     display: none;
+  }
+
+  .agenda-google-actions {
+    width: 100%;
+  }
+
+  .agenda-google-status {
+    max-width: 100%;
   }
 
   .agenda-container .calendar-day {
@@ -2911,6 +2970,86 @@
 
 .agenda-container .color-option:hover {
   box-shadow: none;
+}
+
+.agenda-container .notification-settings-field {
+  border-radius: 10px;
+}
+
+.agenda-container .notification-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.agenda-container .notification-toggle-row,
+.agenda-container .notification-minutes-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--texto-primario);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.agenda-container .notification-toggle-row {
+  justify-content: flex-start;
+}
+
+.agenda-container .notification-toggle-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--azul-acento);
+  cursor: pointer;
+}
+
+.agenda-container .notification-minutes-row select {
+  min-width: 180px;
+  min-height: 38px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 8px;
+  background: var(--branco);
+  color: var(--texto-primario);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+}
+
+.agenda-container .notification-minutes-row select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.agenda-container .notification-helper {
+  color: var(--texto-secundario);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.agenda-container .agenda-google-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.agenda-container .agenda-google-sync-btn {
+  min-height: 34px;
+  border-radius: 7px;
+  border: 1px solid var(--azul-acento);
+  background: var(--azul-acento-tinta);
+  color: var(--azul-acento);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+}
+
+.agenda-container .agenda-google-sync-btn:hover {
+  background: #E3EBFC;
 }
 
 @media (max-width: 760px) {

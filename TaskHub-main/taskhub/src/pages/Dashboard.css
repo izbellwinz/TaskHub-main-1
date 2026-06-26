@@ -725,6 +725,45 @@
   transform: translateX(16px);
 }
 
+.notification-minutes-row {
+  align-items: center;
+}
+
+.notification-minutes-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-secundario);
+  font-size: 13px;
+}
+
+.notification-minutes-control input {
+  width: 72px;
+  height: 36px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 8px;
+  padding: 0 10px;
+  font: 600 14px 'Inter', sans-serif;
+  color: var(--texto-primario);
+  background: var(--branco);
+  outline: none;
+}
+
+.notification-minutes-control input:focus {
+  border-color: var(--azul-acento);
+  box-shadow: 0 0 0 3px rgba(47, 95, 216, 0.14);
+}
+
+.dashboard-container.dark-theme .notification-minutes-control,
+.dashboard-container.dark-theme .notification-minutes-control input {
+  color: #ffffff;
+}
+
+.dashboard-container.dark-theme .notification-minutes-control input {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
 .privacy-item input[type="checkbox"] {
   width: 18px;
   height: 18px;
@@ -766,6 +805,24 @@
   margin-bottom: 10px;
 }
 
+.notification-group + .notification-group {
+  margin-top: 18px;
+}
+
+.notification-group-title {
+  margin-bottom: 10px;
+  color: var(--texto-secundario);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.agenda-notification-item {
+  border-color: rgba(47, 95, 216, 0.2);
+  background: #eef2ff;
+}
+
 .notification-title {
   font-size: 13px;
   font-weight: 600;
@@ -785,6 +842,21 @@
 .empty-subtext {
   font-size: 12px;
   color: #64748b;
+}
+
+.notification-read-btn {
+  margin-top: 8px;
+  border: 1px solid rgba(47, 95, 216, 0.22);
+  border-radius: 999px;
+  background: #eef2ff;
+  color: var(--azul-acento);
+  cursor: pointer;
+  font: 700 12px 'Inter', sans-serif;
+  padding: 7px 12px;
+}
+
+.notification-read-btn:hover {
+  background: #dce8fb;
 }
 
 .notification-empty {
@@ -807,6 +879,121 @@
 .dashboard-container.dark-theme .notification-text,
 .dashboard-container.dark-theme .empty-text {
   color: #ffffff;
+}
+
+.dashboard-container.dark-theme .notification-read-btn {
+  background: rgba(47, 95, 216, 0.16);
+  border-color: rgba(143, 176, 245, 0.28);
+  color: #bfdbfe;
+}
+
+.notification-toast-stack {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  width: min(360px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-toast {
+  display: grid;
+  grid-template-columns: 5px minmax(0, 1fr) 32px;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+  animation: notification-toast-in 0.18s ease-out;
+}
+
+.notification-toast-bar {
+  background: var(--azul-acento);
+}
+
+.notification-toast-content {
+  padding: 14px 12px;
+  min-width: 0;
+}
+
+.notification-toast-label {
+  margin-bottom: 4px;
+  color: var(--azul-acento);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.notification-toast strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-toast p {
+  margin: 4px 0 0;
+  color: #475569;
+  font-size: 12.5px;
+}
+
+.notification-toast button {
+  width: 32px;
+  border: 0;
+  border-left: 1px solid rgba(148, 163, 184, 0.16);
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font: 700 13px 'Inter', sans-serif;
+}
+
+.notification-toast button:hover {
+  background: #f1f5f9;
+  color: #111827;
+}
+
+.dashboard-container.dark-theme .notification-toast {
+  background: #1f2937;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+}
+
+.dashboard-container.dark-theme .notification-toast strong {
+  color: #ffffff;
+}
+
+.dashboard-container.dark-theme .notification-toast p {
+  color: #cbd5e1;
+}
+
+.dashboard-container.dark-theme .notification-toast button {
+  color: #cbd5e1;
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-container.dark-theme .notification-toast button:hover {
+  background: #111827;
+  color: #ffffff;
+}
+
+@keyframes notification-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 860px) {

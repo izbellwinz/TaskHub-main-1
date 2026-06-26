@@ -17,6 +17,37 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Ajuste para quando estiver no modo escuro (ex: página Agenda) */
+body[data-theme='dark'] .navbar,
+body.agenda-dark .navbar,
+.agenda-container.dark-theme .navbar {
+  /* mesma linha de estilos do header do site em dark */
+  background: rgba(255, 255, 255, 0.88);
+  /* fallback se seu tema dark da Agenda não estiver afetando este navbar */
+  border-bottom: 1px solid rgba(226, 232, 240, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+
+
+body[data-theme='dark'] .logo,
+.agenda-container.dark-theme .logo {
+  color: #ffffff;
+}
+
+body[data-theme='dark'] .sign-in,
+.agenda-container.dark-theme .sign-in {
+  background: linear-gradient(135deg, #8EA2FF 0%, #263bff 100%);
+  box-shadow: 0 2px 10px rgba(142, 162, 255, 0.25);
+}
+
+body[data-theme='dark'] .sign-in:hover,
+.agenda-container.dark-theme .sign-in:hover {
+  background: linear-gradient(135deg, #A7B6FF 0%, #283593 100%);
+  box-shadow: 0 4px 15px rgba(142, 162, 255, 0.35);
+}
+
+
 .logo {
   display: flex;
   align-items: center;
@@ -34,8 +65,8 @@
   transform: scale(1.02);
 }
 
-
 .navbar-right {
+
   display: flex;
   align-items: center;
   gap: 0.75rem;

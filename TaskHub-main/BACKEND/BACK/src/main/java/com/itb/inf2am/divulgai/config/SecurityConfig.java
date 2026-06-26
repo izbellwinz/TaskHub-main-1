@@ -6,6 +6,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,8 +29,11 @@ public class SecurityConfig {
             // Todas as rotas /api/v1/** são públicas.
             // O controle de acesso é feito manualmente nos controllers.
             .authorizeHttpRequests(auth -> auth
+                // Endpoints públicos (evita ambiguidades de matcher e garante criação de conta)
                 .requestMatchers("/api/v1/**").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/usuarios").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/usuarios/login").permitAll()
+            .anyRequest().authenticated()
             )
 
             // ================= LOGIN/LOGOUT =================
@@ -36,6 +41,7 @@ public class SecurityConfig {
             // em /api/v1/usuarios/login para autenticação via JSON.
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable);
+
 
         return http.build();
     }

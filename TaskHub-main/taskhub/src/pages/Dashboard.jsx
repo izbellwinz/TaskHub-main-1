@@ -1,16 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import './Dashboard.css';
 import AgendaService from '../services/AgendaService';
 import NotificacaoService from '../services/NotificacaoService';
 import ConfiguracaoService from '../services/ConfiguracaoService';
 import UsuarioService from '../services/UsuarioService';
+import TarefaService from '../services/TarefaService';
 
 function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationLeadMinutes, setNotificationLeadMinutes] = useState(() => {
+    const saved = Number(localStorage.getItem('taskhub-notification-lead-minutes'));
+    return Number.isFinite(saved) ? Math.min(Math.max(saved, 0), 60) : 30;
+  });
+  const [activeToasts, setActiveToasts] = useState([]);
+
+
   const [events, setEvents] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [notificacoes, setNotificacoes] = useState([]);
   const [configuracao, setConfiguracao] = useState(null);
 
@@ -19,7 +28,25 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
     if (!currentUser) return;
 
     AgendaService.findByUsuarioId(currentUser.id)
-      .then((response) => setEvents(response.data || []))
+      .then(async (response) => {
+        const loadedEvents = response.data || [];
+        setEvents(loadedEvents);
+
+        const loadedTasks = await Promise.all(
+          loadedEvents.map((event) =>
+            TarefaService.findByAgendaId(event.id)
+              .then((taskResponse) => (taskResponse.data || []).map((task) => ({
+                ...task,
+                agendaTitulo: event.titulo,
+              })))
+              .catch((error) => {
+                console.error(`Erro ao carregar tarefas da agenda ${event.id}:`, error);
+                return [];
+              })
+          )
+        );
+        setTasks(loadedTasks.flat());
+      })
       .catch(error => console.error('Erro ao carregar agendas:', error));
 
     NotificacaoService.findByUsuarioId(currentUser.id)
@@ -27,7 +54,12 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
       .catch(error => console.error('Erro ao carregar notificacoes:', error));
 
     ConfiguracaoService.findByUsuarioId(currentUser.id)
-      .then((response) => setConfiguracao(response.data))
+      .then((response) => {
+        setConfiguracao(response.data);
+        if (response.data?.receberEmail !== undefined) {
+          setNotificationsEnabled(response.data.receberEmail !== false);
+        }
+      })
       .catch(error => console.error('Erro ao carregar configuracoes:', error));
   }, []);
 
@@ -69,21 +101,46 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
     return timeStr.slice(0, 5);
   };
 
-  const getEventDateTime = (event) => {
+  const getEventDateTime = useCallback((event) => {
     const date = event.dataAgenda || todayKey;
     const time = event.hora || '00:00:00';
     return new Date(`${date}T${time}`);
+  }, [todayKey]);
+
+  const getTaskDateTime = (task) => {
+    if (!task.dataVencimento) return null;
+    return new Date(task.dataVencimento);
   };
 
-  const activeEvents = events
+  const getDismissedToastKeys = () => {
+    try {
+      return JSON.parse(localStorage.getItem('taskhub-dismissed-notifications') || '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  const saveDismissedToastKey = (key) => {
+    const dismissed = new Set(getDismissedToastKeys());
+    dismissed.add(key);
+    localStorage.setItem('taskhub-dismissed-notifications', JSON.stringify([...dismissed].slice(-200)));
+  };
+
+  const formatDueTime = (date) => date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const activeEvents = useMemo(() => events
     .filter(event => (event.statusAgenda || 'ativo').toLowerCase() !== 'concluido')
-    .sort((a, b) => getEventDateTime(a) - getEventDateTime(b));
+    .sort((a, b) => getEventDateTime(a) - getEventDateTime(b)), [events, getEventDateTime]);
 
   const todayEvents = activeEvents.filter(event => event.dataAgenda === todayKey);
   const nextTask = activeEvents.find(event => {
     const eventDate = event.dataAgenda || '';
     return eventDate >= tomorrowKey;
   });
+  const pendingNotificationsCount = notificacoes.filter((notification) => !notification.lida).length + activeToasts.length;
 
   const handleThemeChange = (isDark) => {
     setDarkTheme(isDark);
@@ -113,6 +170,98 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
         .then(r => setConfiguracao(r.data));
     }
   };
+
+  const handleNotificationLeadChange = (value) => {
+    const nextValue = Math.min(Math.max(Number(value) || 0, 0), 60);
+    setNotificationLeadMinutes(nextValue);
+    localStorage.setItem('taskhub-notification-lead-minutes', String(nextValue));
+  };
+
+  const toggleNotifications = () => {
+    const nextValue = !notificationsEnabled;
+    setNotificationsEnabled(nextValue);
+    saveConfiguracao({ receberEmail: nextValue });
+  };
+
+  const dismissToast = (toastKey) => {
+    saveDismissedToastKey(toastKey);
+    setActiveToasts((current) => current.filter((toast) => toast.key !== toastKey));
+  };
+
+  const markPersistedNotificationAsRead = (notification) => {
+    NotificacaoService.update(notification.id, {
+      ...notification,
+      lida: true,
+      statusNotificacao: notification.statusNotificacao || 'enviada',
+    })
+      .then((response) => {
+        setNotificacoes((current) => current.map((item) => item.id === notification.id ? response.data : item));
+      })
+      .catch((error) => console.error('Erro ao marcar notificacao como lida:', error));
+  };
+
+  useEffect(() => {
+    if (!notificationsEnabled) {
+      setActiveToasts([]);
+      return undefined;
+    }
+
+    const checkUpcomingItems = () => {
+      const now = new Date();
+      const dismissed = new Set(getDismissedToastKeys());
+      const upcomingEvents = activeEvents
+        .map((event) => {
+          if (event.notificar === false) return null;
+
+          const dueAt = getEventDateTime(event);
+          const diffMinutes = (dueAt - now) / 60000;
+          const key = `event-${event.id}-${event.dataAgenda}-${event.hora}`;
+          const eventLeadMinutes = Math.min(Math.max(Number(event.antecedenciaNotificacao ?? notificationLeadMinutes) || 0, 0), 60);
+
+          if (diffMinutes < 0 || diffMinutes > eventLeadMinutes || dismissed.has(key)) {
+            return null;
+          }
+
+          return {
+            key,
+            type: 'Evento',
+            title: event.titulo,
+            message: eventLeadMinutes === 0
+              ? `Comeca agora, as ${formatDueTime(dueAt)}.`
+              : `Comeca as ${formatDueTime(dueAt)}. Aviso configurado para ${eventLeadMinutes} min antes.`,
+          };
+        })
+        .filter(Boolean);
+
+      const upcomingTasks = tasks
+        .map((task) => {
+          const dueAt = getTaskDateTime(task);
+          if (!dueAt) return null;
+
+          const taskLeadMinutes = Math.min(Math.max(Number(task.antecedenciaNotificacao ?? notificationLeadMinutes) || 0, 0), 60);
+          const diffMinutes = (dueAt - now) / 60000;
+          const key = `task-${task.id}-${task.dataVencimento}`;
+
+          if (diffMinutes < 0 || diffMinutes > taskLeadMinutes || dismissed.has(key)) {
+            return null;
+          }
+
+          return {
+            key,
+            type: 'Tarefa',
+            title: task.descricao || task.agendaTitulo || 'Tarefa',
+            message: `Vence as ${formatDueTime(dueAt)}.`,
+          };
+        })
+        .filter(Boolean);
+
+      setActiveToasts([...upcomingEvents, ...upcomingTasks].slice(0, 3));
+    };
+
+    checkUpcomingItems();
+    const intervalId = window.setInterval(checkUpcomingItems, 30000);
+    return () => window.clearInterval(intervalId);
+  }, [notificationsEnabled, notificationLeadMinutes, activeEvents, tasks, getEventDateTime]);
 
   return (
     <div className={`dashboard-container ${darkTheme ? 'dark-theme' : ''}`}>
@@ -167,7 +316,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 4-2 5-2 6h16c0-1-2-2-2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
             </span>
             <span className="sidebar-label">Notificações</span>
-            {notificacoes.length > 0 && <span className="badge">{notificacoes.length}</span>}
+            {pendingNotificationsCount > 0 && <span className="badge">{pendingNotificationsCount}</span>}
           </button>
 
           <button className="sidebar-item" type="button" onClick={() => setShowSettings(true)}>
@@ -289,14 +438,26 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
                   <span className="settings-switch">
                     <input
                       type="checkbox"
-                      checked={configuracao?.receberEmail !== false}
-                      onChange={(e) => {
-                        saveConfiguracao({ receberEmail: e.target.checked });
-                      }}
+                      checked={notificationsEnabled}
+                      onChange={toggleNotifications}
                     />
                     <span className="track"></span>
                     <span className="thumb"></span>
                   </span>
+                </div>
+                <div className="setting-row notification-minutes-row">
+                  <label htmlFor="notification-minutes">Avisar antes</label>
+                  <div className="notification-minutes-control">
+                    <input
+                      id="notification-minutes"
+                      type="number"
+                      min="0"
+                      max="60"
+                      value={notificationLeadMinutes}
+                      onChange={(e) => handleNotificationLeadChange(e.target.value)}
+                    />
+                    <span>min</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -312,7 +473,7 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
               <div className="notifications-controls">
                 <button
                   className={`toggle-notifications-btn ${notificationsEnabled ? 'enabled' : 'disabled'}`}
-                  onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                  onClick={toggleNotifications}
                   type="button"
                 >
                   {notificationsEnabled ? 'Desativar' : 'Ativar'}
@@ -322,6 +483,23 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
             </div>
 
             <div className="notifications-body">
+              {activeToasts.length > 0 && (
+                <div className="notification-group">
+                  <div className="notification-group-title">Agenda</div>
+                  {activeToasts.map((toast) => (
+                    <div key={toast.key} className="notification-item agenda-notification-item">
+                      <div className="notification-content">
+                        <div className="notification-title">{toast.type}</div>
+                        <div className="notification-text">{toast.title}</div>
+                        <div className="notification-time">{toast.message}</div>
+                        <button className="notification-read-btn" type="button" onClick={() => dismissToast(toast.key)}>
+                          Marcar como lida
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               {notificacoes.length > 0 ? (
                 notificacoes.map(n => (
                   <div key={n.id} className="notification-item">
@@ -329,17 +507,40 @@ function Dashboard({ darkTheme, setDarkTheme = () => {} }) {
                       <div className="notification-title">{n.statusNotificacao}</div>
                       <div className="notification-text">{n.mensagem}</div>
                       <div className="notification-time">{new Date(n.dataEnvio).toLocaleString('pt-BR')}</div>
+                      {!n.lida && (
+                        <button className="notification-read-btn" type="button" onClick={() => markPersistedNotificationAsRead(n)}>
+                          Marcar como lida
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
-              ) : (
+              ) : activeToasts.length === 0 ? (
                 <div className="notification-empty">
                   <div className="empty-text">Você está em dia!</div>
                   <div className="empty-subtext">Nenhuma notificação pendente</div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
+        </div>
+      )}
+
+      {activeToasts.length > 0 && (
+        <div className="notification-toast-stack" aria-live="polite">
+          {activeToasts.map((toast) => (
+            <div className="notification-toast" key={toast.key} role="status">
+              <div className="notification-toast-bar" aria-hidden="true"></div>
+              <div className="notification-toast-content">
+                <div className="notification-toast-label">TaskHub - {toast.type}</div>
+                <strong>{toast.title}</strong>
+                <p>{toast.message}</p>
+              </div>
+              <button type="button" onClick={() => dismissToast(toast.key)} aria-label="Fechar notificacao">
+                x
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

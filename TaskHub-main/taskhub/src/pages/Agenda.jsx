@@ -4,6 +4,31 @@ import AgendaService from '../services/AgendaService';
 import TarefaService from '../services/TarefaService';
 import UsuarioService from '../services/UsuarioService';
 
+
+const DEFAULT_NOTIFICATION_MINUTES = 30;
+const MAX_NOTIFICATION_MINUTES = 60;
+
+const clampNotificationMinutes = (value) => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return DEFAULT_NOTIFICATION_MINUTES;
+  return Math.min(MAX_NOTIFICATION_MINUTES, Math.max(0, parsed));
+};
+
+const createEmptyEventForm = (date = '') => ({
+  title: '',
+  date,
+  time: '',
+  description: '',
+  checklist: [],
+  image: null,
+  color: '#DCE8FB',
+  icon: '',
+  notify: true,
+  notificationMinutes: DEFAULT_NOTIFICATION_MINUTES,
+  googleEventId: null,
+  syncedGoogle: false,
+});
+
 function Agenda({ darkTheme }) {
   const [events, setEvents] = useState([]);
 
@@ -39,6 +64,10 @@ function Agenda({ darkTheme }) {
     checklist,
     image: agenda.arquivo ? `data:${inferImageMimeType(agenda.arquivo)};base64,${agenda.arquivo}` : null,
     statusAgenda: agenda.statusAgenda,
+    notify: agenda.notificar !== false,
+    notificationMinutes: clampNotificationMinutes(agenda.antecedenciaNotificacao),
+    googleEventId: agenda.googleEventId || null,
+    syncedGoogle: Boolean(agenda.sincronizadoGoogle),
   });
 
   const buildChecklistPayload = (agendaId, item) => ({
@@ -86,12 +115,9 @@ function Agenda({ darkTheme }) {
   }, []);
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [eventForm, setEventForm] = useState({
-    title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#DCE8FB', icon: ''
-  });
+  const [eventForm, setEventForm] = useState(createEmptyEventForm());
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, eventId: null });
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -115,6 +141,7 @@ function Agenda({ darkTheme }) {
     color: eventTextColors[color] || '#0C447C',
   });
 
+
   const handleAddEvent = () => {
     if (eventForm.title && eventForm.date) {
       const user = UsuarioService.getCurrentUser();
@@ -135,6 +162,9 @@ function Agenda({ darkTheme }) {
         statusAgenda: 'ativo',
         cor: eventForm.color || '#DCE8FB',
         arquivo: eventForm.image ? eventForm.image.split(',')[1] : null,
+        notificar: Boolean(eventForm.notify),
+        antecedenciaNotificacao: clampNotificationMinutes(eventForm.notificationMinutes),
+
       };
 
       if (eventForm.id) {
@@ -148,7 +178,10 @@ function Agenda({ darkTheme }) {
               date: response.data.dataAgenda,
               time: response.data.hora,
               checklist,
-              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
+              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image,
+              notify: response.data.notificar !== false,
+              notificationMinutes: clampNotificationMinutes(response.data.antecedenciaNotificacao),
+
             };
             setEvents(events.map(e => e.id === eventForm.id ? updatedEvent : e));
             setShowModal(false);
@@ -168,7 +201,10 @@ function Agenda({ darkTheme }) {
               date: response.data.dataAgenda,
               time: response.data.hora,
               checklist,
-              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image
+              image: response.data.arquivo ? `data:${inferImageMimeType(response.data.arquivo)};base64,${response.data.arquivo}` : eventForm.image,
+              notify: response.data.notificar !== false,
+              notificationMinutes: clampNotificationMinutes(response.data.antecedenciaNotificacao),
+
             };
             setEvents([...events, newEvent]);
             setShowModal(false);
@@ -179,7 +215,7 @@ function Agenda({ darkTheme }) {
           });
       }
       // Resetar formulário após sucesso ou tentar novamente
-      setEventForm({ title: '', date: '', time: '', description: '', checklist: [], image: null, color: '#DCE8FB', icon: '' });
+      setEventForm(createEmptyEventForm());
     } else {
       alert('Por favor, preencha o título e a data.');
     }
@@ -231,7 +267,11 @@ function Agenda({ darkTheme }) {
         descricao: eventToUpdate.description,
         statusAgenda: eventToUpdate.statusAgenda || 'ativo',
         cor: color,
-        arquivo: eventToUpdate.image ? eventToUpdate.image.split(',')[1] : null
+        arquivo: eventToUpdate.image ? eventToUpdate.image.split(',')[1] : null,
+        notificar: Boolean(eventToUpdate.notify),
+        antecedenciaNotificacao: clampNotificationMinutes(eventToUpdate.notificationMinutes),
+        googleEventId: eventToUpdate.googleEventId || null,
+        sincronizadoGoogle: Boolean(eventToUpdate.syncedGoogle),
       };
 
       AgendaService.update(eventId, data)
@@ -333,7 +373,10 @@ function Agenda({ darkTheme }) {
   const getEventsForDay = (dayObj) => events.filter(e => e.date === formatDate(dayObj));
 
   const handleDayClick = (dayObj) => {
-    if (dayObj?.day) { setEventForm({ ...eventForm, date: formatDate(dayObj) }); setShowModal(true); }
+    if (dayObj?.day) {
+      setEventForm(createEmptyEventForm(formatDate(dayObj)));
+      setShowModal(true);
+    }
   };
 
   const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -359,6 +402,8 @@ function Agenda({ darkTheme }) {
     return formatDate(dayObj) === todayKey;
   };
 
+
+
   return (
     <div className={`agenda-container ${darkTheme ? 'dark-theme' : ''}`} onClick={closeContextMenu}>
       <header className="agenda-site-header">
@@ -375,10 +420,11 @@ function Agenda({ darkTheme }) {
               <button onClick={nextMonth} className="agenda-nav-btn" type="button" aria-label="Próximo mês">›</button>
             </div>
           </div>
-          <button className="agenda-btn-new" type="button" onClick={() => { setEventForm({ ...eventForm, date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}` }); setShowModal(true); }}>
+          <button className="agenda-btn-new" type="button" onClick={() => { setEventForm(createEmptyEventForm(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)); setShowModal(true); }}>
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
             <span>Novo evento</span>
           </button>
+
         </nav>
       </header>
 
@@ -474,6 +520,34 @@ function Agenda({ darkTheme }) {
                   ))}
                 </div>
               </div>
+              <div className="form-field notification-settings-field">
+                <div className="field-icon"></div>
+                <div className="field-content notification-settings-content">
+                  <label className="notification-toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={eventForm.notify}
+                      onChange={(e) => setEventForm({ ...eventForm, notify: e.target.checked })}
+                    />
+                    <span>Quero ser avisado sobre este evento</span>
+                  </label>
+                  <label className="notification-minutes-row">
+                    <span>Avisar com antecedencia</span>
+                    <select
+                      value={clampNotificationMinutes(eventForm.notificationMinutes)}
+                      onChange={(e) => setEventForm({ ...eventForm, notificationMinutes: clampNotificationMinutes(e.target.value) })}
+                      disabled={!eventForm.notify}
+                    >
+                      {[0, 5, 10, 15, 30, 45, 60].map((minutes) => (
+                        <option key={minutes} value={minutes}>
+                          {minutes === 0 ? 'No horario do evento' : `${minutes} minutos antes`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <span className="notification-helper">Limite maximo: 60 minutos antes.</span>
+                </div>
+              </div>
               <div className="form-field">
                 <div className="field-icon"></div>
                 <div className="field-content">
@@ -548,6 +622,15 @@ function Agenda({ darkTheme }) {
                   <span className="detail-value">{selectedEvent.time}</span>
                 </div>
               )}
+              <div className="detail-item left-aligned">
+                <span className="detail-label">Notificacao:</span>
+                <span className="detail-value">
+                  {selectedEvent.notify
+                    ? `Ativada - ${clampNotificationMinutes(selectedEvent.notificationMinutes)} minuto(s) antes`
+                    : 'Desativada'}
+                </span>
+              </div>
+
               {selectedEvent.description && (
                 <div className="detail-item left-aligned">
                   <span className="detail-label">Descrição:</span>
@@ -592,6 +675,7 @@ function Agenda({ darkTheme }) {
           </div>
         </div>
       )}
+
     </div>
   );
 }

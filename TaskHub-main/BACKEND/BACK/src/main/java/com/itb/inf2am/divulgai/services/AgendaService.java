@@ -13,6 +13,13 @@ public class AgendaService {
     @Autowired
     private AgendaRepository agendaRepository;
 
+    private void aplicarCamposNotificacao(Agenda destino, Agenda origem) {
+        destino.setNotificar(origem.getNotificar());
+        destino.setAntecedenciaNotificacao(origem.getAntecedenciaNotificacao());
+        destino.setGoogleEventId(origem.getGoogleEventId());
+        destino.setSincronizadoGoogle(origem.getSincronizadoGoogle());
+    }
+
     // Método responsável em listar todas as Agendas cadastradas no banco de dados
     public List<Agenda> findAll() {
         return agendaRepository.findAll();
@@ -25,6 +32,9 @@ public class AgendaService {
 
     // Método responsável em Criar a Agenda no banco de dados
     public Agenda save(Agenda agenda) {
+        agenda.setNotificar(agenda.getNotificar());
+        agenda.setAntecedenciaNotificacao(agenda.getAntecedenciaNotificacao());
+        agenda.setSincronizadoGoogle(agenda.getSincronizadoGoogle());
         return agendaRepository.save(agenda);
     }
 
@@ -45,6 +55,7 @@ public class AgendaService {
         agendaExistente.setArquivo(agenda.getArquivo());
         agendaExistente.setStatusAgenda(agenda.getStatusAgenda());
         agendaExistente.setCor(agenda.getCor());
+        aplicarCamposNotificacao(agendaExistente, agenda);
         return agendaRepository.save(agendaExistente);
     }
 

@@ -1,0 +1,174 @@
+.notification-toast-stack {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.notification-toast {
+  pointer-events: auto;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid rgba(98, 100, 167, 0.18);
+  border-left: 4px solid #6264a7;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  animation: taskhub-toast-in 180ms ease-out;
+}
+
+.notification-toast-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 8px;
+}
+
+.notification-toast-app {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6264a7;
+}
+
+.notification-toast-subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.notification-toast-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.notification-toast-close:hover,
+.notification-toast-close:focus-visible {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.notification-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 14px 12px;
+}
+
+.notification-toast-body strong {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.notification-toast-body span,
+.notification-toast-body p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.notification-toast-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  background: #f8fafc;
+}
+
+.notification-toast-actions button {
+  min-height: 34px;
+  border-radius: 6px;
+  border: 1px solid rgba(98, 100, 167, 0.25);
+  background: #ffffff;
+  color: #3730a3;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 10px;
+}
+
+.notification-toast-actions button:hover,
+.notification-toast-actions button:focus-visible {
+  background: #eef2ff;
+}
+
+.dark-theme .notification-toast {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: rgba(167, 139, 250, 0.2);
+  border-left-color: #a78bfa;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.44);
+}
+
+.dark-theme .notification-toast-app {
+  color: #c4b5fd;
+}
+
+.dark-theme .notification-toast-subtitle,
+.dark-theme .notification-toast-body span,
+.dark-theme .notification-toast-body p {
+  color: #d1d5db;
+}
+
+.dark-theme .notification-toast-close {
+  color: #d1d5db;
+}
+
+.dark-theme .notification-toast-close:hover,
+.dark-theme .notification-toast-close:focus-visible {
+  background: #374151;
+  color: #ffffff;
+}
+
+.dark-theme .notification-toast-actions {
+  background: #111827;
+}
+
+.dark-theme .notification-toast-actions button {
+  background: #1f2937;
+  color: #ddd6fe;
+  border-color: rgba(196, 181, 253, 0.28);
+}
+
+.dark-theme .notification-toast-actions button:hover,
+.dark-theme .notification-toast-actions button:focus-visible {
+  background: #312e81;
+}
+
+@keyframes taskhub-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .notification-toast-stack {
+    right: 16px;
+    bottom: 16px;
+  }
+}
