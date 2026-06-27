@@ -17,6 +17,17 @@ function Perfil({ darkTheme }) {
     if (user) {
       setUserData({ nome: user.nome || '', email: user.email || '' });
       setProfilePhoto(user.foto || null);
+
+      if (user.id) {
+        UsuarioService.findById(user.id)
+          .then((response) => {
+            const updatedUser = { ...user, ...response.data };
+            setUserData({ nome: updatedUser.nome || '', email: updatedUser.email || '' });
+            setProfilePhoto(updatedUser.foto || null);
+            updateCurrentUser(updatedUser);
+          })
+          .catch(() => {});
+      }
     }
   }, []);
 

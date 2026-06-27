@@ -166,6 +166,7 @@ GO
 SELECT
     id,
     nome,
+    senha,
     email,
     nivelAcesso,
     statusUsuario,

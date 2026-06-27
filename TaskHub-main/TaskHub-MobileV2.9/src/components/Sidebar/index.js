@@ -2,20 +2,26 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { authService } from '../../services/api';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS, shadows } from '../../styles/theme';
+import { SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { ROUTES } from '../../constants/routes';
 
 const BRAND = {
-  primary: '#0d1b5e',
-  indigo: '#3949ab',
-  soft: '#eef2ff',
+  midnight: '#0a1a33',
+  accent: '#2f5fd8',
+  lightPanel: '#eef2fa',
+  text: '#0a1a33',
+  secondary: '#5c6b89',
+  line: 'rgba(10, 26, 51, 0.10)',
+  white: '#ffffff',
   danger: '#ef4444',
+  dangerSoft: '#fee2e2',
 };
 
 const SUPPORT_ITEMS = [
@@ -40,11 +46,30 @@ export default function SidebarContent({ navigation }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    authService.getCurrentUser().then(setUser);
+    let mounted = true;
+
+    const loadUser = async () => {
+      const currentUser = await authService.getCurrentUser();
+      if (mounted) setUser(currentUser);
+
+      try {
+        const refreshedUser = await authService.refreshCurrentUser();
+        if (mounted) setUser(refreshedUser);
+      } catch (error) {
+        console.warn('Erro ao atualizar usuario do menu:', error?.message || error);
+      }
+    };
+
+    loadUser();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const userName = user?.nome || user?.name || 'Usuario';
   const userEmail = user?.email || user?.username || 'E-mail nao disponivel';
+  const profilePhoto = user?.foto || null;
 
   const handleLogout = async () => {
     await authService.logout();
@@ -63,9 +88,14 @@ export default function SidebarContent({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.hero}>
+        <Text style={styles.heroEyebrow}>Minha conta</Text>
         <View style={styles.profileRow}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitials(userName)}</Text>
+            {profilePhoto ? (
+              <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
+            ) : (
+              <Text style={styles.avatarText}>{getInitials(userName)}</Text>
+            )}
           </View>
           <View style={styles.profileText}>
             <Text style={styles.name} numberOfLines={1}>{userName}</Text>
@@ -85,11 +115,11 @@ export default function SidebarContent({ navigation }) {
               onPress={() => handleShortcutPress(item)}
             >
               <View style={styles.menuIconBox}>
-                <Feather name={item.icon} size={18} color={BRAND.indigo} />
+                <Feather name={item.icon} size={18} color={BRAND.accent} />
               </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
               {item.route ? (
-                <Feather name="chevron-right" size={18} color="#a5acc7" />
+                <Feather name="chevron-right" size={18} color={BRAND.secondary} />
               ) : (
                 <Text style={styles.soonText}>Em breve</Text>
               )}
@@ -115,14 +145,30 @@ export default function SidebarContent({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: BRAND.white,
   },
   hero: {
-    backgroundColor: BRAND.primary,
+    backgroundColor: BRAND.midnight,
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.lg,
     paddingBottom: SPACING.lg,
-    borderBottomLeftRadius: 26,
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderRadius: 20,
+    shadowColor: BRAND.midnight,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  heroEyebrow: {
+    color: '#9fb3d9',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.7,
+    marginBottom: SPACING.md,
+    textTransform: 'uppercase',
   },
   profileRow: {
     flexDirection: 'row',
@@ -132,66 +178,73 @@ const styles = StyleSheet.create({
   avatar: {
     width: 58,
     height: 58,
-    borderRadius: 18,
-    backgroundColor: '#fde68a',
+    borderRadius: 14,
+    backgroundColor: BRAND.lightPanel,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   avatarText: {
-    color: BRAND.primary,
+    color: BRAND.midnight,
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   profileText: {
     flex: 1,
   },
   name: {
     fontSize: TYPOGRAPHY.subtitle,
-    fontWeight: '800',
-    color: COLORS.white,
+    fontWeight: '600',
+    color: BRAND.white,
   },
   email: {
     fontSize: TYPOGRAPHY.small,
-    color: 'rgba(255,255,255,0.72)',
+    color: '#9fb3d9',
     marginTop: 4,
   },
   content: {
     flex: 1,
-    paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
   },
   sectionLabel: {
-    marginLeft: SPACING.sm,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
     fontSize: 11,
-    fontWeight: '800',
-    color: COLORS.secondaryText,
+    fontWeight: '700',
+    color: BRAND.accent,
+    letterSpacing: 0.7,
     textTransform: 'uppercase',
   },
   menu: {
     marginBottom: SPACING.lg,
   },
   menuItem: {
-    minHeight: 54,
+    minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.md,
+    backgroundColor: BRAND.white,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
-    paddingHorizontal: SPACING.sm,
-    marginBottom: 8,
-    ...shadows.md,
+    borderColor: BRAND.line,
+    paddingHorizontal: SPACING.md,
+    marginBottom: 10,
   },
   secondaryItem: {
-    shadowOpacity: 0.03,
-    elevation: 1,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   menuIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    backgroundColor: BRAND.soft,
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: BRAND.lightPanel,
+    borderWidth: 1,
+    borderColor: BRAND.line,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.sm,
@@ -199,31 +252,31 @@ const styles = StyleSheet.create({
   menuLabel: {
     flex: 1,
     fontSize: TYPOGRAPHY.body,
-    color: COLORS.text,
-    fontWeight: '700',
+    color: BRAND.text,
+    fontWeight: '600',
   },
   soonText: {
     fontSize: 11,
-    color: COLORS.secondaryText,
-    fontWeight: '700',
+    color: BRAND.secondary,
+    fontWeight: '600',
   },
   logoutItem: {
     minHeight: 54,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.md,
+    backgroundColor: BRAND.white,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#fee2e2',
-    paddingHorizontal: SPACING.sm,
-    marginHorizontal: SPACING.md,
+    borderColor: BRAND.dangerSoft,
+    paddingHorizontal: SPACING.md,
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
   },
   logoutIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    backgroundColor: '#fee2e2',
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: BRAND.dangerSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.sm,
@@ -231,6 +284,6 @@ const styles = StyleSheet.create({
   logoutLabel: {
     fontSize: TYPOGRAPHY.body,
     color: BRAND.danger,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

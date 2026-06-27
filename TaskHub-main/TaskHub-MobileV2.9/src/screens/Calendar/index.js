@@ -9,19 +9,24 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS, shadows } from '../../styles/theme';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { authService, agendaService } from '../../services/api';
 import TaskCard from '../../components/TaskCard';
 
 const BRAND = {
-  primary: '#0d1b5e',
-  primary2: '#1a237e',
-  indigo: '#3949ab',
-  indigo2: '#5c6bc0',
-  soft: '#eef2ff',
-  soft2: '#f5f7ff',
-  yellow: '#fde68a',
+  midnight: '#0a1a33',
+  accent: '#2f5fd8',
+  accentTint: '#E8EFFD',
+  panel: '#ffffff',
+  bg: '#F6F8FC',
+  bgAlt: '#EEF2F7',
+  text: '#0a1a33',
+  secondary: '#5c6b89',
+  line: 'rgba(10, 26, 51, 0.10)',
+  lineStrong: 'rgba(10, 26, 51, 0.18)',
+  headerMuted: '#9FB3D9',
+  success: '#10b981',
 };
 
 const MONTH_NAMES = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -42,7 +47,7 @@ export default function CalendarScreen() {
     id: item.id,
     date: item.dataAgenda,
     title: item.titulo,
-    color: item.cor || BRAND.indigo,
+    color: item.cor || BRAND.accent,
     time: item.hora,
     description: item.descricao,
     done: item.statusAgenda === 'CONCLUIDO',
@@ -132,7 +137,7 @@ export default function CalendarScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={BRAND.primary} />
+        <ActivityIndicator size="large" color={BRAND.accent} />
       </View>
     );
   }
@@ -149,27 +154,27 @@ export default function CalendarScreen() {
       <View style={styles.hero}>
         <View style={styles.heroTop}>
           <View>
-            <Text style={styles.eyebrow}>Agenda</Text>
+            <Text style={styles.eyebrow}>TaskHub</Text>
             <Text style={styles.heroTitle}>{MONTH_NAMES[month]} {year}</Text>
           </View>
           <TouchableOpacity onPress={onRefresh} style={styles.refreshBtn} activeOpacity={0.82}>
-            <Feather name="refresh-cw" size={18} color={BRAND.primary} />
+            <Feather name="refresh-cw" size={18} color={BRAND.text} />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.heroCopy}>Acompanhe os dias, veja o que vence e filtre suas tarefas sem sair da tela.</Text>
+        <Text style={styles.heroCopy}>Calendario mensal com a mesma leitura limpa da agenda web.</Text>
 
         <View style={styles.statsRow}>
           <View style={styles.statPill}>
-            <Feather name="calendar" size={14} color={BRAND.indigo} />
+            <Feather name="calendar" size={14} color={BRAND.accent} />
             <Text style={styles.statPillText}>{events.length} eventos</Text>
           </View>
           <View style={styles.statPill}>
-            <Feather name="clock" size={14} color={BRAND.indigo} />
+            <Feather name="clock" size={14} color={BRAND.accent} />
             <Text style={styles.statPillText}>{pendingCount} pendentes</Text>
           </View>
           <View style={styles.statPill}>
-            <Feather name="check-circle" size={14} color="#10b981" />
+            <Feather name="check-circle" size={14} color={BRAND.success} />
             <Text style={styles.statPillText}>{completedCount} concluidas</Text>
           </View>
         </View>
@@ -179,16 +184,16 @@ export default function CalendarScreen() {
         <View style={styles.monthCard}>
           <View style={styles.header}>
             <TouchableOpacity onPress={prevMonth} style={styles.navBtn} activeOpacity={0.82}>
-              <Feather name="chevron-left" size={20} color={BRAND.primary} />
+              <Feather name="chevron-left" size={20} color={BRAND.text} />
             </TouchableOpacity>
 
             <View style={styles.monthBadge}>
-              <Feather name="calendar" size={16} color={BRAND.primary} />
+              <Feather name="calendar" size={16} color={BRAND.accent} />
               <Text style={styles.monthTitle}>{MONTH_NAMES[month]} {year}</Text>
             </View>
 
             <TouchableOpacity onPress={nextMonth} style={styles.navBtn} activeOpacity={0.82}>
-              <Feather name="chevron-right" size={20} color={BRAND.primary} />
+              <Feather name="chevron-right" size={20} color={BRAND.text} />
             </TouchableOpacity>
           </View>
 
@@ -201,7 +206,7 @@ export default function CalendarScreen() {
 
             <View style={styles.grid}>
               {Array(firstDay).fill(null).map((_, index) => (
-                <View key={`empty-${index}`} style={styles.dayCell} />
+                <View key={`empty-${index}`} style={[styles.dayCell, styles.emptyDayCell]} />
               ))}
               {Array(daysInMonth).fill(null).map((_, index) => {
                 const day = index + 1;
@@ -210,11 +215,20 @@ export default function CalendarScreen() {
                 return (
                   <View key={day} style={[styles.dayCell, isToday(day) && styles.todayCell]}>
                     <Text style={[styles.dayNumber, isToday(day) && styles.todayNumber]}>{day}</Text>
-                    <View style={styles.dotsRow}>
-                      {dayEvents.slice(0, 3).map((event) => (
-                        <View key={event.id} style={[styles.eventDot, { backgroundColor: event.color }]} />
-                      ))}
-                    </View>
+                    {dayEvents.length > 0 && (
+                      <View style={styles.dayEvents}>
+                        {dayEvents.slice(0, 2).map((event) => (
+                          <View key={event.id} style={[styles.eventPreview, { borderLeftColor: event.color }]}>
+                            <Text style={styles.eventPreviewText} numberOfLines={1}>
+                              {event.title}
+                            </Text>
+                          </View>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <Text style={styles.moreEvents}>+{dayEvents.length - 2}</Text>
+                        )}
+                      </View>
+                    )}
                   </View>
                 );
               })}
@@ -249,7 +263,7 @@ export default function CalendarScreen() {
         <View style={styles.list}>
           {filteredTasks.length === 0 ? (
             <View style={styles.emptyWrap}>
-              <Feather name="check-circle" size={22} color={BRAND.indigo2} />
+              <Feather name="check-circle" size={22} color={BRAND.accent} />
               <Text style={styles.emptyText}>Nenhuma tarefa aqui.</Text>
             </View>
           ) : (
@@ -273,7 +287,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: BRAND.bg,
     paddingTop: 0,
   },
   center: {
@@ -281,12 +295,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   hero: {
-    backgroundColor: BRAND.primary,
+    backgroundColor: BRAND.panel,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 58,
-    paddingBottom: SPACING.lg,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingTop: 54,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.line,
   },
   heroTop: {
     flexDirection: 'row',
@@ -296,32 +310,34 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 12,
-    letterSpacing: 1.2,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.72)',
-    fontWeight: '800',
+    color: BRAND.accent,
+    fontWeight: '600',
     marginBottom: 6,
   },
   heroTitle: {
     fontSize: 28,
     lineHeight: 34,
-    fontWeight: '800',
-    color: COLORS.white,
+    fontWeight: '600',
+    color: BRAND.text,
   },
   heroCopy: {
     marginTop: 10,
     maxWidth: 320,
     fontSize: TYPOGRAPHY.small,
     lineHeight: 20,
-    color: 'rgba(255,255,255,0.82)',
+    color: BRAND.secondary,
   },
   refreshBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: COLORS.white,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: BRAND.panel,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.lineStrong,
   },
   statsRow: {
     flexDirection: 'row',
@@ -333,114 +349,144 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: BRAND.yellow,
-    paddingHorizontal: 12,
+    backgroundColor: BRAND.panel,
+    paddingHorizontal: 11,
     paddingVertical: 8,
-    borderRadius: 999,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: BRAND.line,
   },
   statPillText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: BRAND.primary,
+    fontWeight: '600',
+    color: BRAND.text,
   },
   sectionWrap: {
     paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.xl,
   },
   monthCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 24,
-    padding: SPACING.md,
+    backgroundColor: BRAND.panel,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
-    ...shadows.md,
+    borderColor: BRAND.lineStrong,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: SPACING.md,
+    padding: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.line,
     gap: 10,
   },
   navBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: BRAND.soft,
-    borderRadius: 14,
+    width: 38,
+    height: 38,
+    backgroundColor: BRAND.panel,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.lineStrong,
   },
   monthBadge: {
     flex: 1,
-    minHeight: 40,
+    minHeight: 38,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: BRAND.soft2,
-    borderRadius: 14,
+    backgroundColor: BRAND.bg,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#e4e8fb',
+    borderColor: BRAND.line,
     paddingHorizontal: 12,
   },
   monthTitle: {
-    fontSize: TYPOGRAPHY.subtitle,
-    fontWeight: '800',
-    color: BRAND.primary,
+    fontSize: 15,
+    fontWeight: '700',
+    color: BRAND.text,
   },
   calendar: {
-    backgroundColor: COLORS.white,
+    backgroundColor: BRAND.line,
   },
   dayNames: {
     flexDirection: 'row',
-    marginBottom: 8,
+    backgroundColor: BRAND.midnight,
   },
   dayName: {
     flex: 1,
     textAlign: 'center',
     fontSize: 11,
-    fontWeight: '800',
-    color: COLORS.secondaryText,
+    fontWeight: '600',
+    color: BRAND.headerMuted,
     textTransform: 'uppercase',
+    paddingVertical: 12,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    backgroundColor: BRAND.line,
   },
   dayCell: {
     width: '14.28%',
-    aspectRatio: 1,
-    alignItems: 'center',
+    minHeight: 72,
+    backgroundColor: BRAND.panel,
     justifyContent: 'flex-start',
-    paddingTop: 6,
-    borderRadius: 12,
+    paddingHorizontal: 4,
+    paddingTop: 7,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: BRAND.line,
+  },
+  emptyDayCell: {
+    backgroundColor: BRAND.bgAlt,
   },
   todayCell: {
-    backgroundColor: BRAND.primary,
+    backgroundColor: BRAND.accentTint,
   },
   dayNumber: {
     fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '600',
+    color: BRAND.text,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    textAlign: 'center',
+    lineHeight: 26,
   },
   todayNumber: {
+    backgroundColor: BRAND.accent,
     color: COLORS.white,
   },
-  dotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
+  dayEvents: {
     marginTop: 4,
-    minHeight: 8,
+    gap: 3,
   },
-  eventDot: {
-    width: 5,
-    height: 5,
+  eventPreview: {
+    minHeight: 14,
+    borderLeftWidth: 3,
     borderRadius: 3,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 3,
+    justifyContent: 'center',
+  },
+  eventPreviewText: {
+    fontSize: 8,
+    lineHeight: 12,
+    fontWeight: '600',
+    color: BRAND.text,
+  },
+  moreEvents: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: BRAND.accent,
   },
   tasksSection: {
     paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.xl,
     marginBottom: SPACING.xl,
   },
   tasksHeader: {
@@ -448,13 +494,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '800',
-    color: COLORS.text,
+    fontWeight: '600',
+    color: BRAND.text,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.small,
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
   },
   filters: {
     flexDirection: 'row',
@@ -466,22 +512,22 @@ const styles = StyleSheet.create({
   filterBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    backgroundColor: BRAND.panel,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
+    borderColor: BRAND.lineStrong,
   },
   filterActive: {
-    backgroundColor: BRAND.primary,
-    borderColor: BRAND.primary,
+    backgroundColor: BRAND.accentTint,
+    borderColor: BRAND.accent,
   },
   filterText: {
     fontSize: TYPOGRAPHY.small,
-    fontWeight: '700',
-    color: COLORS.secondaryText,
+    fontWeight: '600',
+    color: BRAND.secondary,
   },
   filterTextActive: {
-    color: COLORS.white,
+    color: BRAND.accent,
   },
   list: {
     gap: 12,
@@ -491,15 +537,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
+    backgroundColor: BRAND.panel,
+    borderRadius: 12,
     paddingVertical: SPACING.xl,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
+    borderColor: BRAND.line,
   },
   emptyText: {
     fontSize: TYPOGRAPHY.body,
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
     fontWeight: '600',
   },
 });

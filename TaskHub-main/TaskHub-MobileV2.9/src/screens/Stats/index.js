@@ -6,19 +6,24 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS, shadows } from '../../styles/theme';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { authService, agendaService } from '../../services/api';
 
 const BRAND = {
-  primary: '#0d1b5e',
-  indigo: '#3949ab',
-  indigo2: '#5c6bc0',
-  soft: '#eef2ff',
-  soft2: '#f5f7ff',
-  yellow: '#fde68a',
+  midnight: '#0a1a33',
+  accent: '#2f5fd8',
+  lightPanel: '#eef2fa',
+  panel: '#ffffff',
+  text: '#0a1a33',
+  secondary: '#5c6b89',
+  line: 'rgba(10, 26, 51, 0.10)',
+  lineStrong: 'rgba(10, 26, 51, 0.18)',
+  successTint: '#effaf4',
+  success: '#166534',
 };
 
 const STAT_CARDS = [
@@ -26,29 +31,29 @@ const STAT_CARDS = [
     label: 'Concluidas',
     key: 'completed',
     icon: 'check-circle',
-    color: '#dcfce7',
+    color: '#effaf4',
     textColor: '#166534',
   },
   {
     label: 'Pendentes',
     key: 'pending',
     icon: 'clock',
-    color: '#dbeafe',
-    textColor: '#1e40af',
+    color: '#e8effd',
+    textColor: '#2f5fd8',
   },
   {
     label: 'Total',
     key: 'total',
     icon: 'calendar',
-    color: '#fee2e2',
-    textColor: '#991b1b',
+    color: '#f8fafc',
+    textColor: '#0a1a33',
   },
   {
     label: 'Eficiencia',
     key: 'efficiency',
     icon: 'zap',
-    color: '#ede9fe',
-    textColor: '#5b21b6',
+    color: '#fff8eb',
+    textColor: '#8a5a00',
   },
 ];
 
@@ -131,7 +136,7 @@ export default function StatsScreen() {
   if (loading) {
     return (
       <View style={[styles.loading, styles.center]}>
-        <ActivityIndicator size="large" color={BRAND.primary} />
+        <ActivityIndicator size="large" color={BRAND.accent} />
       </View>
     );
   }
@@ -148,33 +153,33 @@ export default function StatsScreen() {
       <View style={styles.hero}>
         <View style={styles.heroTop}>
           <View>
-            <Text style={styles.eyebrow}>Estatisticas</Text>
-            <Text style={styles.heroTitle}>Visao geral</Text>
+            <Text style={styles.eyebrow}>TaskHub</Text>
+            <Text style={styles.heroTitle}>Estatisticas</Text>
           </View>
-          <View style={styles.heroIcon}>
-            <Feather name="bar-chart-2" size={22} color={BRAND.primary} />
-          </View>
+          <TouchableOpacity onPress={onRefresh} style={styles.heroIcon} activeOpacity={0.82}>
+            <Feather name="refresh-cw" size={18} color={BRAND.text} />
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.heroCopy}>
-          Acompanhe conclusoes, pendencias e o ritmo das tarefas da sua agenda.
+          Um resumo direto do ritmo das tarefas, alinhado ao painel web.
         </Text>
+      </View>
 
+      <View style={styles.content}>
         <View style={styles.heroProgressCard}>
           <View>
             <Text style={styles.progressCaption}>Conclusao total</Text>
             <Text style={styles.progressValue}>{stats.efficiency}</Text>
           </View>
           <View style={styles.progressRing}>
-            <Feather name="trending-up" size={24} color={BRAND.primary} />
+            <Feather name="trending-up" size={24} color={BRAND.midnight} />
           </View>
         </View>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${stats.progress}%` }]} />
         </View>
-      </View>
 
-      <View style={styles.content}>
         <View style={styles.statsGrid}>
           {STAT_CARDS.map((stat) => (
             <View key={stat.key} style={styles.statCard}>
@@ -196,7 +201,7 @@ export default function StatsScreen() {
               <Text style={styles.cardSubtitle}>Tarefas agrupadas por dia da semana</Text>
             </View>
             <View style={styles.cardIcon}>
-              <Feather name="activity" size={18} color={BRAND.indigo} />
+              <Feather name="activity" size={18} color={BRAND.accent} />
             </View>
           </View>
 
@@ -209,7 +214,7 @@ export default function StatsScreen() {
                       styles.barFill,
                       {
                         height: `${item.percent}%`,
-                        backgroundColor: item.value > 0 ? BRAND.indigo : '#d8def8',
+                        backgroundColor: item.value > 0 ? BRAND.accent : '#d8def8',
                       },
                     ]}
                   />
@@ -228,13 +233,13 @@ export default function StatsScreen() {
               <Text style={styles.cardSubtitle}>Ultimas movimentacoes da agenda</Text>
             </View>
             <View style={styles.cardIcon}>
-              <Feather name="clock" size={18} color={BRAND.indigo} />
+              <Feather name="clock" size={18} color={BRAND.accent} />
             </View>
           </View>
 
           {stats.recent.length === 0 ? (
             <View style={styles.emptyWrap}>
-              <Feather name="inbox" size={22} color={BRAND.indigo2} />
+              <Feather name="inbox" size={22} color={BRAND.accent} />
               <Text style={styles.emptyText}>Nenhuma atividade recente</Text>
             </View>
           ) : (
@@ -252,7 +257,7 @@ export default function StatsScreen() {
                     <Feather
                       name={done ? 'check' : 'calendar'}
                       size={16}
-                      color={done ? '#166534' : BRAND.indigo}
+                      color={done ? BRAND.success : BRAND.accent}
                     />
                   </View>
                   <View style={styles.recentInfo}>
@@ -282,23 +287,23 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: BRAND.lightPanel,
   },
   loading: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: BRAND.lightPanel,
   },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   hero: {
-    backgroundColor: BRAND.primary,
+    backgroundColor: BRAND.panel,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 58,
-    paddingBottom: SPACING.lg,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingTop: 54,
+    paddingBottom: 26,
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.line,
   },
   heroTop: {
     flexDirection: 'row',
@@ -308,118 +313,127 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 12,
-    letterSpacing: 1.2,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.72)',
-    fontWeight: '800',
+    color: BRAND.accent,
+    fontWeight: '600',
     marginBottom: 6,
   },
   heroTitle: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '800',
-    color: COLORS.white,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '500',
+    color: BRAND.text,
   },
   heroIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: COLORS.white,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: BRAND.panel,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.lineStrong,
   },
   heroCopy: {
-    marginTop: 10,
+    marginTop: 8,
     maxWidth: 320,
-    fontSize: TYPOGRAPHY.small,
-    lineHeight: 20,
-    color: 'rgba(255,255,255,0.82)',
+    fontSize: 14,
+    lineHeight: 21,
+    color: BRAND.secondary,
   },
   heroProgressCard: {
-    marginTop: SPACING.lg,
+    backgroundColor: BRAND.midnight,
+    borderRadius: 18,
+    padding: 28,
+    marginBottom: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   progressCaption: {
     fontSize: TYPOGRAPHY.small,
-    color: 'rgba(255,255,255,0.72)',
-    fontWeight: '700',
+    color: '#BCCDF2',
+    fontWeight: '500',
     marginBottom: 4,
   },
   progressValue: {
-    fontSize: 44,
+    fontSize: 42,
     lineHeight: 48,
-    fontWeight: '800',
+    fontWeight: '600',
     color: COLORS.white,
   },
   progressRing: {
     width: 56,
     height: 56,
-    borderRadius: 18,
-    backgroundColor: BRAND.yellow,
+    borderRadius: 12,
+    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   progressTrack: {
-    height: 9,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    height: 8,
+    backgroundColor: '#dbe3ff',
     borderRadius: 999,
-    marginTop: SPACING.md,
+    marginTop: -34,
+    marginHorizontal: 28,
+    marginBottom: SPACING.xl,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: BRAND.indigo2,
+    backgroundColor: BRAND.accent,
     borderRadius: 999,
   },
   content: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.xl,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: SPACING.lg,
+    gap: 1,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: BRAND.line,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: BRAND.line,
   },
   statCard: {
-    width: '47%',
-    minHeight: 132,
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.md,
+    width: '49.8%',
+    minHeight: 126,
+    backgroundColor: BRAND.panel,
     padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: '#e6e9f8',
-    ...shadows.md,
   },
   statIcon: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: BRAND.line,
   },
   statValue: {
     fontSize: 30,
     lineHeight: 34,
-    fontWeight: '800',
+    fontWeight: '600',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: TYPOGRAPHY.small,
-    color: COLORS.secondaryText,
-    fontWeight: '700',
+    color: BRAND.secondary,
+    fontWeight: '600',
   },
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 24,
-    padding: SPACING.lg,
+    backgroundColor: BRAND.panel,
+    borderRadius: 18,
+    padding: 22,
     marginBottom: SPACING.xl,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
-    ...shadows.md,
+    borderColor: BRAND.line,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -430,21 +444,23 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: TYPOGRAPHY.subtitle,
-    fontWeight: '800',
-    color: COLORS.text,
+    fontWeight: '600',
+    color: BRAND.text,
     marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: TYPOGRAPHY.small,
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
   },
   cardIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 13,
-    backgroundColor: BRAND.soft,
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: BRAND.lightPanel,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.line,
   },
   bars: {
     flexDirection: 'row',
@@ -459,14 +475,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   barTrack: {
-    width: 26,
+    width: 24,
     height: 94,
-    backgroundColor: BRAND.soft2,
+    backgroundColor: BRAND.lightPanel,
     borderRadius: 999,
     justifyContent: 'flex-end',
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e4e8fb',
+    borderColor: BRAND.line,
   },
   barFill: {
     width: '100%',
@@ -474,14 +490,14 @@ const styles = StyleSheet.create({
   },
   barValue: {
     fontSize: 11,
-    color: BRAND.primary,
-    fontWeight: '800',
+    color: BRAND.text,
+    fontWeight: '600',
     marginTop: 8,
   },
   barLabel: {
     fontSize: 11,
-    color: COLORS.secondaryText,
-    fontWeight: '700',
+    color: BRAND.secondary,
+    fontWeight: '600',
     marginTop: 3,
   },
   recentItem: {
@@ -490,7 +506,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: BRAND.line,
   },
   recentItemLast: {
     borderBottomWidth: 0,
@@ -499,15 +515,17 @@ const styles = StyleSheet.create({
   recentIcon: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.line,
   },
   recentIconDone: {
-    backgroundColor: COLORS.low,
+    backgroundColor: BRAND.successTint,
   },
   recentIconPending: {
-    backgroundColor: BRAND.soft,
+    backgroundColor: BRAND.lightPanel,
   },
   recentInfo: {
     flex: 1,
@@ -515,52 +533,55 @@ const styles = StyleSheet.create({
   },
   recentTitle: {
     fontSize: TYPOGRAPHY.body,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '600',
+    color: BRAND.text,
     marginBottom: 3,
   },
   recentDone: {
     textDecorationLine: 'line-through',
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
   },
   recentDate: {
     fontSize: TYPOGRAPHY.small,
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
   },
   statusPill: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   statusDone: {
-    backgroundColor: COLORS.low,
+    backgroundColor: BRAND.successTint,
+    borderColor: 'rgba(22, 101, 52, 0.16)',
   },
   statusPending: {
-    backgroundColor: BRAND.soft,
+    backgroundColor: BRAND.lightPanel,
+    borderColor: BRAND.lineStrong,
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   statusTextDone: {
     color: '#166534',
   },
   statusTextPending: {
-    color: BRAND.indigo,
+    color: BRAND.accent,
   },
   emptyWrap: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: BRAND.soft2,
-    borderRadius: RADIUS.md,
+    backgroundColor: BRAND.lightPanel,
+    borderRadius: 12,
     paddingVertical: SPACING.xl,
     borderWidth: 1,
-    borderColor: '#e4e8fb',
+    borderColor: BRAND.line,
   },
   emptyText: {
     fontSize: TYPOGRAPHY.body,
-    color: COLORS.secondaryText,
+    color: BRAND.secondary,
     fontWeight: '600',
   },
 });

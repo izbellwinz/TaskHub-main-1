@@ -12,23 +12,48 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { authService, agendaService } from '../../services/api';
 import TaskCard from '../../components/TaskCard';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS, shadows } from '../../styles/theme';
+import { SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { ROUTES } from '../../constants/routes';
-import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 const BRAND = {
-  primary: '#0d1b5e',
-  primary2: '#1a237e',
-  indigo: '#3949ab',
-  indigo2: '#5c6bc0',
-  soft: '#eef2ff',
-  yellow: '#fde68a',
+  midnight: '#0a1a33',
+  accent: '#2f5fd8',
+  lightPanel: '#eef2fa',
+  text: '#0a1a33',
+  secondary: '#5c6b89',
+  line: 'rgba(10, 26, 51, 0.10)',
+  lineStrong: 'rgba(10, 26, 51, 0.18)',
+  white: '#ffffff',
+  sky: '#8fb0f5',
 };
 
 const TODAY = new Date().toLocaleDateString('pt-BR', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
+});
+
+const getLocalDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDateKey = (value) => {
+  if (!value) return '';
+  return String(value).slice(0, 10);
+};
+
+const normalizeAgenda = (item) => ({
+  ...item,
+  id: item.id,
+  titulo: item.titulo || item.title || 'Tarefa sem titulo',
+  dataAgenda: getDateKey(item.dataAgenda || item.date),
+  hora: item.hora || item.time || '',
+  descricao: item.descricao || item.description || '',
+  cor: item.cor || item.color || BRAND.accent,
+  statusAgenda: item.statusAgenda || item.status || 'ATIVO',
 });
 
 function getGreeting() {
@@ -55,7 +80,7 @@ function LogoMark() {
         </View>
       </View>
       <View style={styles.logoSearch}>
-        <Feather name="check" size={14} color={BRAND.primary} strokeWidth={3} />
+        <Feather name="check" size={14} color={BRAND.white} strokeWidth={3} />
       </View>
       <View style={styles.logoHandle} />
     </View>
@@ -63,7 +88,6 @@ function LogoMark() {
 }
 
 export default function DashboardScreen({ navigation }) {
-  const tabBarPadding = useTabBarPadding();
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,20 +100,10 @@ export default function DashboardScreen({ navigation }) {
       if (currentUser) {
         try {
           const data = await agendaService.findByUsuarioId(currentUser.id);
-          setEvents(data);
+          setEvents(data.map(normalizeAgenda));
         } catch (apiError) {
-          console.warn('API Offline, usando dados de exemplo (MOCK)');
-          import('../../data/mockData').then((m) => {
-            const mapped = m.MOCK_EVENTS.map((e) => ({
-              id: e.id,
-              titulo: e.title,
-              dataAgenda: e.date,
-              hora: '12:00',
-              cor: e.color,
-              descricao: 'Exemplo de tarefa (Modo Dev)',
-            }));
-            setEvents(mapped);
-          });
+          console.warn('Erro ao carregar agendas do backend:', apiError?.message || apiError);
+          setEvents([]);
         }
       }
     } catch (error) {
@@ -110,15 +124,26 @@ export default function DashboardScreen({ navigation }) {
   };
 
   const getTodayEvents = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return events.filter((e) => e.dataAgenda === today);
+    const today = getLocalDateKey();
+    return events
+      .filter((e) => (e.statusAgenda || '').toLowerCase() !== 'concluido')
+      .filter((e) => e.dataAgenda === today)
+      .sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
   };
 
   const getUpcomingEvents = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowKey = getLocalDateKey(tomorrow);
+
     return events
-      .filter((e) => e.dataAgenda > today)
-      .sort((a, b) => a.dataAgenda.localeCompare(b.dataAgenda));
+      .filter((e) => (e.statusAgenda || '').toLowerCase() !== 'concluido')
+      .filter((e) => e.dataAgenda >= tomorrowKey)
+      .sort((a, b) => {
+        const dateCompare = a.dataAgenda.localeCompare(b.dataAgenda);
+        if (dateCompare !== 0) return dateCompare;
+        return (a.hora || '').localeCompare(b.hora || '');
+      });
   };
 
   const getStats = () => {
@@ -135,7 +160,7 @@ export default function DashboardScreen({ navigation }) {
   if (loading) {
     return (
       <View style={[styles.loading, styles.center]}>
-        <ActivityIndicator size="large" color={BRAND.primary} />
+        <ActivityIndicator size="large" color={BRAND.accent} />
       </View>
     );
   }
@@ -143,8 +168,14 @@ export default function DashboardScreen({ navigation }) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: tabBarPadding }}
+      contentContainerStyle={styles.scrollContent}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      bounces={false}
+      alwaysBounceVertical={false}
+      automaticallyAdjustContentInsets={false}
+      contentInsetAdjustmentBehavior="never"
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.hero}>
         <View style={styles.heroTop}>
@@ -153,7 +184,7 @@ export default function DashboardScreen({ navigation }) {
             <Text style={styles.brandText}>TaskHub</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => navigation.openDrawer()}>
-            <Feather name="menu" size={22} color={BRAND.primary} />
+            <Feather name="menu" size={22} color={BRAND.text} />
           </TouchableOpacity>
         </View>
 
@@ -161,22 +192,32 @@ export default function DashboardScreen({ navigation }) {
         <Text style={styles.greeting}>
           {getGreeting()}, <Text style={styles.name}>{user?.nome || 'Usuario'}</Text>
         </Text>
-        <Text style={styles.heroCopy}>Organize sua rotina com a mesma clareza do TaskHub web.</Text>
+        <Text style={styles.heroCopy}>
+          Organize reuniões, tarefas e compromissos em um só lugar, com a mesma clareza do TaskHub web.
+        </Text>
+        <View style={styles.heroMeta}>
+          <View style={styles.avatarStack}>
+            <Text style={styles.avatar}>JL</Text>
+            <Text style={[styles.avatar, styles.avatarAlt]}>MS</Text>
+            <Text style={[styles.avatar, styles.avatarMore]}>+</Text>
+          </View>
+          <Text style={styles.heroMetaText}>rotina organizada com foco no que importa</Text>
+        </View>
       </View>
 
       <View style={styles.content}>
         <View style={styles.searchWrap}>
-          <Feather name="search" size={18} color={BRAND.indigo} />
+          <Feather name="search" size={18} color={BRAND.accent} />
           <TextInput
             placeholder="Buscar tarefas..."
-            placeholderTextColor={COLORS.secondaryText}
+            placeholderTextColor={BRAND.secondary}
             style={styles.searchInput}
           />
         </View>
 
         <View style={styles.statsRow}>
           <View style={styles.statMini}>
-            <Feather name="calendar" size={18} color={BRAND.indigo} />
+            <Feather name="calendar" size={18} color={BRAND.accent} />
             <Text style={styles.statValue}>{stats.total}</Text>
             <Text style={styles.statLabel}>Eventos</Text>
           </View>
@@ -194,20 +235,32 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.progressValue}>{stats.progress}%</Text>
             </View>
             <View style={styles.progressIcon}>
-              <Feather name="award" size={28} color={BRAND.primary} />
+              <Feather name="award" size={28} color={BRAND.midnight} />
             </View>
           </View>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${stats.progress}%` }]} />
           </View>
           <Text style={styles.progressSub}>{stats.completed} tarefas concluidas no total</Text>
+          <View style={styles.agendaPreview}>
+            <View style={styles.agendaItem}>
+              <View style={styles.agendaBar} />
+              <Text style={styles.agendaTime}>Hoje</Text>
+              <Text style={styles.agendaText}>{todayEvents.length || 'Sem'} tarefa(s)</Text>
+            </View>
+            <View style={styles.agendaItem}>
+              <View style={[styles.agendaBar, styles.agendaBarAlt]} />
+              <Text style={styles.agendaTime}>Depois</Text>
+              <Text style={styles.agendaText}>{upcomingEvents.length || 'Sem'} compromisso(s)</Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleWrap}>
               <View style={styles.sectionIcon}>
-                <Feather name="zap" size={16} color={BRAND.indigo} />
+                <Feather name="zap" size={16} color={BRAND.accent} />
               </View>
               <Text style={styles.sectionTitle}>Importante hoje</Text>
             </View>
@@ -217,7 +270,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
           {todayEvents.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Feather name="check-circle" size={22} color={BRAND.indigo2} />
+              <Feather name="check-circle" size={22} color={BRAND.accent} />
               <Text style={styles.empty}>Nenhuma atividade para hoje</Text>
             </View>
           ) : (
@@ -234,11 +287,11 @@ export default function DashboardScreen({ navigation }) {
           )}
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, styles.lastSection]}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleWrap}>
               <View style={styles.sectionIcon}>
-                <Feather name="clock" size={16} color={BRAND.indigo} />
+                <Feather name="clock" size={16} color={BRAND.accent} />
               </View>
               <Text style={styles.sectionTitle}>Em breve</Text>
             </View>
@@ -248,7 +301,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
           {upcomingEvents.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Feather name="calendar" size={22} color={BRAND.indigo2} />
+              <Feather name="calendar" size={22} color={BRAND.accent} />
               <Text style={styles.empty}>Sem atividades futuras</Text>
             </View>
           ) : (
@@ -270,64 +323,69 @@ export default function DashboardScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0f2f5' },
-  loading: { flex: 1, backgroundColor: '#f0f2f5' },
+  container: { flex: 1, backgroundColor: BRAND.white },
+  scrollContent: { paddingBottom: 0 },
+  loading: { flex: 1, backgroundColor: BRAND.white },
   center: { justifyContent: 'center', alignItems: 'center' },
   hero: {
-    backgroundColor: BRAND.primary,
-    paddingTop: 58,
+    backgroundColor: BRAND.white,
+    paddingTop: 54,
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 34,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingBottom: 30,
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.line,
   },
   heroTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: SPACING.xl,
+    marginBottom: 42,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  brandText: { color: COLORS.white, fontSize: 22, fontWeight: '800' },
+  brandText: {
+    color: BRAND.text,
+    fontSize: 22,
+    fontWeight: '600',
+  },
   logoMark: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: COLORS.white,
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: BRAND.accent,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   logoCalendar: {
-    width: 27,
-    height: 28,
-    borderRadius: 5,
+    width: 22,
+    height: 22,
+    borderRadius: 4,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: BRAND.primary2,
-    backgroundColor: COLORS.white,
-    transform: [{ translateX: -3 }, { translateY: -2 }],
+    borderWidth: 1,
+    borderColor: BRAND.white,
+    backgroundColor: 'transparent',
+    transform: [{ translateX: -2 }, { translateY: -2 }],
   },
-  logoTop: { height: 9, backgroundColor: BRAND.primary },
-  logoBody: { flex: 1, padding: 3, gap: 3 },
+  logoTop: { height: 7, backgroundColor: BRAND.white },
+  logoBody: { flex: 1, padding: 3, gap: 2 },
   logoGridRow: { flexDirection: 'row', gap: 3 },
   logoCell: {
-    width: 7,
-    height: 6,
+    width: 5,
+    height: 4,
     borderRadius: 2,
-    backgroundColor: 'rgba(13,27,94,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
-  logoCellStrong: { backgroundColor: BRAND.indigo },
+  logoCellStrong: { backgroundColor: BRAND.white },
   logoSearch: {
     position: 'absolute',
     right: 3,
     bottom: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     borderWidth: 2,
-    borderColor: BRAND.primary,
-    backgroundColor: COLORS.white,
+    borderColor: BRAND.white,
+    backgroundColor: BRAND.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -335,73 +393,118 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 2,
     bottom: 2,
-    width: 8,
+    width: 7,
     height: 3,
     borderRadius: 2,
-    backgroundColor: BRAND.primary,
+    backgroundColor: BRAND.white,
     transform: [{ rotate: '45deg' }],
   },
   menuButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: COLORS.white,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: BRAND.white,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BRAND.lineStrong,
   },
   date: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.74)',
+    color: BRAND.accent,
     fontWeight: '600',
-    textTransform: 'capitalize',
-    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 14,
   },
-  greeting: { fontSize: 28, lineHeight: 34, fontWeight: '700', color: COLORS.white },
-  name: { fontWeight: '800', color: COLORS.white },
+  greeting: {
+    fontSize: 34,
+    lineHeight: 38,
+    fontWeight: '500',
+    color: BRAND.text,
+  },
+  name: { fontWeight: '500', color: BRAND.accent },
   heroCopy: {
-    marginTop: 10,
-    maxWidth: 300,
-    fontSize: TYPOGRAPHY.small,
-    lineHeight: 20,
-    color: 'rgba(255,255,255,0.82)',
+    marginTop: 18,
+    maxWidth: 330,
+    fontSize: 16,
+    lineHeight: 26,
+    color: BRAND.secondary,
   },
-  content: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
+  heroMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 24,
+  },
+  avatarStack: {
+    flexDirection: 'row',
+  },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: BRAND.white,
+    marginLeft: -8,
+    backgroundColor: BRAND.accent,
+    color: BRAND.white,
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  avatarAlt: {
+    backgroundColor: BRAND.sky,
+    color: BRAND.midnight,
+  },
+  avatarMore: {
+    backgroundColor: BRAND.lightPanel,
+    color: BRAND.midnight,
+  },
+  heroMetaText: {
+    flex: 1,
+    fontSize: 13,
+    color: BRAND.secondary,
+  },
+  content: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl },
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
+    backgroundColor: BRAND.white,
+    borderRadius: 8,
     paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: '#d8def8',
-    ...shadows.md,
+    borderColor: BRAND.lineStrong,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 13,
     fontSize: TYPOGRAPHY.body,
-    color: COLORS.text,
+    color: BRAND.text,
   },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: SPACING.md },
+  statsRow: { flexDirection: 'row', gap: 1, marginBottom: SPACING.lg },
   statMini: {
     flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: '#e6e9f8',
-    ...shadows.md,
-  },
-  statValue: { marginTop: 8, fontSize: 24, fontWeight: '800', color: BRAND.primary },
-  statLabel: { fontSize: TYPOGRAPHY.small, color: COLORS.secondaryText, fontWeight: '600' },
-  progressCard: {
-    backgroundColor: BRAND.primary,
-    borderRadius: 24,
+    backgroundColor: BRAND.white,
     padding: SPACING.lg,
-    marginBottom: SPACING.xl,
-    ...shadows.md,
+    borderWidth: 1,
+    borderColor: BRAND.line,
+  },
+  statValue: { marginTop: 10, fontSize: 28, fontWeight: '600', color: BRAND.text },
+  statLabel: { fontSize: TYPOGRAPHY.small, color: BRAND.secondary, fontWeight: '600' },
+  progressCard: {
+    backgroundColor: BRAND.midnight,
+    borderRadius: 20,
+    padding: 28,
+    marginBottom: 44,
+    shadowColor: BRAND.midnight,
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 6,
   },
   progressHeader: {
     flexDirection: 'row',
@@ -411,16 +514,16 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: TYPOGRAPHY.small,
-    color: 'rgba(255,255,255,0.72)',
+    color: '#9fb3d9',
     marginBottom: 4,
     fontWeight: '600',
   },
-  progressValue: { fontSize: 38, fontWeight: '800', color: COLORS.white },
+  progressValue: { fontSize: 42, fontWeight: '600', color: BRAND.white },
   progressIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: BRAND.yellow,
+    width: 46,
+    height: 46,
+    borderRadius: 10,
+    backgroundColor: BRAND.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -431,9 +534,42 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: BRAND.indigo2, borderRadius: 999 },
-  progressSub: { fontSize: TYPOGRAPHY.small, color: 'rgba(255,255,255,0.7)' },
-  section: { marginBottom: SPACING.xl },
+  progressFill: { height: '100%', backgroundColor: BRAND.accent, borderRadius: 999 },
+  progressSub: { fontSize: TYPOGRAPHY.small, color: '#9fb3d9' },
+  agendaPreview: {
+    marginTop: 22,
+    paddingTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.12)',
+    gap: 10,
+  },
+  agendaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  agendaBar: {
+    width: 3,
+    height: 22,
+    borderRadius: 2,
+    backgroundColor: BRAND.accent,
+  },
+  agendaBarAlt: {
+    backgroundColor: BRAND.sky,
+  },
+  agendaTime: {
+    width: 52,
+    color: '#9fb3d9',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  agendaText: {
+    flex: 1,
+    color: BRAND.white,
+    fontSize: 13,
+  },
+  section: { marginBottom: 44 },
+  lastSection: { marginBottom: SPACING.sm },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -442,24 +578,26 @@ const styles = StyleSheet.create({
   },
   sectionTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   sectionIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: BRAND.soft,
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: BRAND.lightPanel,
+    borderWidth: 1,
+    borderColor: BRAND.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sectionTitle: { fontSize: TYPOGRAPHY.subtitle, fontWeight: '800', color: BRAND.primary },
-  seeAll: { fontSize: TYPOGRAPHY.small, color: BRAND.indigo, fontWeight: '700' },
+  sectionTitle: { fontSize: TYPOGRAPHY.subtitle, fontWeight: '600', color: BRAND.text },
+  seeAll: { fontSize: TYPOGRAPHY.small, color: BRAND.accent, fontWeight: '600' },
   emptyCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
+    backgroundColor: BRAND.white,
+    borderRadius: 12,
+    padding: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#e6e9f8',
+    borderColor: BRAND.line,
   },
-  empty: { fontSize: TYPOGRAPHY.body, color: COLORS.secondaryText, fontWeight: '600' },
+  empty: { fontSize: TYPOGRAPHY.body, color: BRAND.secondary, fontWeight: '500' },
 });

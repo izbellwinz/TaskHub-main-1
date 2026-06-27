@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,7 +14,6 @@ import CalendarScreen from '../../screens/Calendar';
 import StatsScreen from '../../screens/Stats';
 import ProfileScreen from '../../screens/Profile';
 import SidebarContent from '../../components/Sidebar';
-import { authService } from '../../services/api';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../styles/theme';
 
@@ -76,7 +74,12 @@ function DrawerNavigator() {
       screenOptions={{
         headerShown: false,
         drawerPosition: 'right',
-        drawerStyle: { width: 280 },
+        drawerStyle: {
+          width: 300,
+          backgroundColor: '#ffffff',
+          borderLeftWidth: 1,
+          borderLeftColor: 'rgba(10, 26, 51, 0.10)',
+        },
       }}
     >
       <Drawer.Screen name="MainTabs" component={TabNavigator} />
@@ -85,37 +88,11 @@ function DrawerNavigator() {
 }
 
 export default function AppNavigator() {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [user, setUser] = React.useState(null);
-
-  React.useEffect(() => {
-    checkSession();
-  }, []);
-
-  const checkSession = async () => {
-    try {
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
-    } catch (error) {
-      console.error('Erro ao verificar sessao:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
-
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
-        initialRouteName={user ? 'App' : ROUTES.WELCOME}
+        initialRouteName={ROUTES.LOGIN}
       >
         <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
         <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
