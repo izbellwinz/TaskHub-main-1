@@ -15,11 +15,11 @@ const features = [
 ];
 
 const weekCells = [
-  ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
-  ['09h', '', 'Reunião', '', '', 'Entrega'],
-  ['11h', 'Compras', '', 'Projeto', '', ''],
-  ['14h', '', '', '', '1:1', ''],
-  ['16h', 'Revisão', '', '', '', ''],
+  ['1', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
+  ['2', '', 'Reunião', '', '', 'Entrega'],
+  ['3', 'Compras', '', 'Projeto', '', ''],
+  ['4', '', '', '', '1:1', ''],
+  ['5', 'Revisão', '', '', '', ''],
 ];
 
 function Home({ setCurrentPage }) {
