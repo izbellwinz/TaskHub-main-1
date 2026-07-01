@@ -100,17 +100,17 @@ function Home({ setCurrentPage }) {
         <section className='home-section' id='semana'>
           <div className='home-showcase'>
             <div>
-              <div className='home-section-eyebrow'>Visão da semana</div>
-              <h2>Veja sua semana inteira sem perder o que importa no dia.</h2>
-              <p className='home-desc'>A grade semanal do TaskHub destaca compromissos fixos e deixa sua rotina mais simples.</p>
+              <div className='home-section-eyebrow'>Visão do mês</div>
+              <h2>Veja seu mês inteiro sem perder o que importa no dia.</h2>
+              <p className='home-desc'>O TaskHub destaca compromissos fixos e deixa sua rotina mais simples.</p>
               <div className='home-showcase-list'>
-                <div className='home-item'><span className='home-check'>✓</span>Arraste para mover um compromisso para outro horário</div>
+                <div className='home-item'><span className='home-check'>✓</span>Arraste para mover um compromisso para outro dia</div>
                 <div className='home-item'><span className='home-check'>✓</span>Compromissos importantes ganham destaque automático</div>
                 <div className='home-item'><span className='home-check'>✓</span>Alterne entre dia, semana e mês com um clique</div>
               </div>
             </div>
             <div className='home-week-card'>
-              <div className='home-week-card-head'><span>22 a 26 de junho</span><span>Semana atual</span></div>
+              <div className='home-week-card-head'><span></span><span>Mês atual</span></div>
               <div className='home-week-grid'>
                 {weekCells.flatMap((row, rowIndex) => row.map((cell, cellIndex) => {
                   const isHead = rowIndex === 0;
