@@ -169,7 +169,7 @@ export default function StatsScreen() {
       <View style={styles.content}>
         <View style={styles.heroProgressCard}>
           <View>
-            <Text style={styles.progressCaption}>Conclusao total</Text>
+            <Text style={styles.progressCaption}>Conclusão total</Text>
             <Text style={styles.progressValue}>{stats.efficiency}</Text>
           </View>
           <View style={styles.progressRing}>
@@ -197,7 +197,7 @@ export default function StatsScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <View>
-              <Text style={styles.cardTitle}>Distribuicao semanal</Text>
+              <Text style={styles.cardTitle}>Distribuição semanal</Text>
               <Text style={styles.cardSubtitle}>Tarefas agrupadas por dia da semana</Text>
             </View>
             <View style={styles.cardIcon}>
@@ -230,7 +230,7 @@ export default function StatsScreen() {
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.cardTitle}>Atividade recente</Text>
-              <Text style={styles.cardSubtitle}>Ultimas movimentacoes da agenda</Text>
+              <Text style={styles.cardSubtitle}>Ultimas movimentações da agenda</Text>
             </View>
             <View style={styles.cardIcon}>
               <Feather name="clock" size={18} color={BRAND.accent} />
