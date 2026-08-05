@@ -154,7 +154,7 @@ export default function StatsScreen() {
         <View style={styles.heroTop}>
           <View>
             <Text style={styles.eyebrow}>TaskHub</Text>
-            <Text style={styles.heroTitle}>Estatisticas</Text>
+            <Text style={styles.heroTitle}>Estatísticas</Text>
           </View>
           <TouchableOpacity onPress={onRefresh} style={styles.heroIcon} activeOpacity={0.82}>
             <Feather name="refresh-cw" size={18} color={BRAND.text} />

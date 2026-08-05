@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
   RefreshControl,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -26,6 +26,9 @@ const BRAND = {
   white: '#ffffff',
   sky: '#8fb0f5',
 };
+
+// Mesma família de destaque usada na tela de login.
+const DISPLAY_FONT = Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' });
 
 const TODAY = new Date().toLocaleDateString('pt-BR', {
   weekday: 'long',
@@ -66,23 +69,9 @@ function getGreeting() {
 function LogoMark() {
   return (
     <View style={styles.logoMark}>
-      <View style={styles.logoCalendar}>
-        <View style={styles.logoTop} />
-        <View style={styles.logoBody}>
-          <View style={styles.logoGridRow}>
-            <View style={[styles.logoCell, styles.logoCellStrong]} />
-            <View style={styles.logoCell} />
-          </View>
-          <View style={styles.logoGridRow}>
-            <View style={styles.logoCell} />
-            <View style={[styles.logoCell, styles.logoCellStrong]} />
-          </View>
-        </View>
-      </View>
-      <View style={styles.logoSearch}>
-        <Feather name="check" size={14} color={BRAND.white} strokeWidth={3} />
-      </View>
-      <View style={styles.logoHandle} />
+      <View style={styles.logoTopLine} />
+      <View style={[styles.logoStem, styles.logoStemLeft]} />
+      <View style={[styles.logoStem, styles.logoStemRight]} />
     </View>
   );
 }
@@ -192,29 +181,9 @@ export default function DashboardScreen({ navigation }) {
         <Text style={styles.greeting}>
           {getGreeting()}, <Text style={styles.name}>{user?.nome || 'Usuario'}</Text>
         </Text>
-        <Text style={styles.heroCopy}>
-          Organize reuniões, tarefas e compromissos em um só lugar, com a mesma clareza do TaskHub web.
-        </Text>
-        <View style={styles.heroMeta}>
-          <View style={styles.avatarStack}>
-            <Text style={styles.avatar}>JL</Text>
-            <Text style={[styles.avatar, styles.avatarAlt]}>MS</Text>
-            <Text style={[styles.avatar, styles.avatarMore]}>+</Text>
-          </View>
-          <Text style={styles.heroMetaText}>rotina organizada com foco no que importa</Text>
-        </View>
       </View>
 
       <View style={styles.content}>
-        <View style={styles.searchWrap}>
-          <Feather name="search" size={18} color={BRAND.accent} />
-          <TextInput
-            placeholder="Buscar tarefas..."
-            placeholderTextColor={BRAND.secondary}
-            style={styles.searchInput}
-          />
-        </View>
-
         <View style={styles.statsRow}>
           <View style={styles.statMini}>
             <Feather name="calendar" size={18} color={BRAND.accent} />
@@ -344,61 +313,28 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   brandText: {
     color: BRAND.text,
+    fontFamily: DISPLAY_FONT,
     fontSize: 22,
     fontWeight: '600',
   },
   logoMark: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 7,
     backgroundColor: BRAND.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
     position: 'relative',
   },
-  logoCalendar: {
-    width: 22,
-    height: 22,
-    borderRadius: 4,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: BRAND.white,
-    backgroundColor: 'transparent',
-    transform: [{ translateX: -2 }, { translateY: -2 }],
-  },
-  logoTop: { height: 7, backgroundColor: BRAND.white },
-  logoBody: { flex: 1, padding: 3, gap: 2 },
-  logoGridRow: { flexDirection: 'row', gap: 3 },
-  logoCell: {
-    width: 5,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  logoCellStrong: { backgroundColor: BRAND.white },
-  logoSearch: {
+  logoTopLine: {
     position: 'absolute',
-    right: 3,
-    bottom: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: BRAND.white,
-    backgroundColor: BRAND.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoHandle: {
-    position: 'absolute',
-    right: 2,
-    bottom: 2,
-    width: 7,
-    height: 3,
-    borderRadius: 2,
+    top: 9,
+    left: 5,
+    right: 5,
+    height: 2,
     backgroundColor: BRAND.white,
-    transform: [{ rotate: '45deg' }],
   },
+  logoStem: { position: 'absolute', top: 5, width: 2, height: 6, backgroundColor: BRAND.white },
+  logoStemLeft: { left: 7 },
+  logoStemRight: { right: 7 },
   menuButton: {
     width: 40,
     height: 40,
@@ -418,12 +354,13 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   greeting: {
+    fontFamily: DISPLAY_FONT,
     fontSize: 34,
     lineHeight: 38,
     fontWeight: '500',
     color: BRAND.text,
   },
-  name: { fontWeight: '500', color: BRAND.accent },
+  name: { fontFamily: DISPLAY_FONT, fontWeight: '500', color: BRAND.accent },
   heroCopy: {
     marginTop: 18,
     maxWidth: 330,
@@ -468,23 +405,6 @@ const styles = StyleSheet.create({
     color: BRAND.secondary,
   },
   content: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl },
-  searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: BRAND.white,
-    borderRadius: 8,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: BRAND.lineStrong,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 13,
-    fontSize: TYPOGRAPHY.body,
-    color: BRAND.text,
-  },
   statsRow: { flexDirection: 'row', gap: 1, marginBottom: SPACING.lg },
   statMini: {
     flex: 1,
@@ -587,7 +507,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sectionTitle: { fontSize: TYPOGRAPHY.subtitle, fontWeight: '600', color: BRAND.text },
+  sectionTitle: { fontFamily: DISPLAY_FONT, fontSize: TYPOGRAPHY.subtitle, fontWeight: '600', color: BRAND.text },
   seeAll: { fontSize: TYPOGRAPHY.small, color: BRAND.accent, fontWeight: '600' },
   emptyCard: {
     backgroundColor: BRAND.white,

@@ -74,7 +74,7 @@ export default function SidebarContent({ navigation }) {
   const handleLogout = async () => {
     await authService.logout();
     navigation.closeDrawer();
-    navigation.navigate('Welcome');
+    navigation.navigate(ROUTES.LOGIN);
   };
 
   const handleShortcutPress = (item) => {

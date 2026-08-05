@@ -6,7 +6,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import WelcomeScreen from '../../screens/Welcome';
 import LoginScreen from '../../screens/Login';
 // import RegisterScreen from '../../screens/Register';
 import DashboardScreen from '../../screens/Home';
@@ -94,7 +93,6 @@ export default function AppNavigator() {
         screenOptions={{ headerShown: false }}
         initialRouteName={ROUTES.LOGIN}
       >
-        <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
         <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
         {/* <Stack.Screen name={ROUTES.REGISTER} component={RegisterScreen} /> */}
         <Stack.Screen name="App" component={DrawerNavigator} />
