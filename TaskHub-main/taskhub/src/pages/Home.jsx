@@ -11,7 +11,7 @@ const days = [
 const features = [
   ['◷', 'Planner Inteligente', 'Organize seus objetivos em um calendário intuitivo. Visualize seus eventos e nunca mais perca um compromisso.'],
   ['▤', 'Checklist dinâmico', 'Crie listas de tarefas personalizadas para cada evento. Marque seus itens como concluídos e acompanhe seu progresso em tempo real.'],
-  ['⊙', 'Anexo multimídia', 'Adicione contexto visual aos seus eventos. Anexe imagens, vídeos e documentos para manter todas as informações importantes em um só lugar.'],
+  ['⊙', 'Anexo multimídia', 'Adicione contexto visual aos seus eventos. Anexe imagens para manter todas as informações importantes em um só lugar.'],
 ];
 
 const weekCells = [
