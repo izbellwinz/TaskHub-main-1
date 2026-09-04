@@ -53,10 +53,7 @@ function Home({ setCurrentPage }) {
               <div className='home-hero-cta'>
                 <button className='home-btn home-btn-primary home-btn-large' type='button' onClick={() => goTo('cadastro')}>Criar conta</button>
               </div>
-              <div className='home-hero-meta'>
-                <div className='home-avatar-stack'><span>JL</span><span>MS</span><span>+</span></div>
-                usado por mais de 4 mil pessoas todos os dias
-              </div>
+              
             </div>
 
             <div className='home-calendar-wrap' aria-label='Calendário de junho de 2026'>
