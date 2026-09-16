@@ -7,11 +7,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Modal,
+  TextInput,
+  Switch,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
-import { authService, agendaService } from '../../services/api';
+import { authService, agendaService, localDataService } from '../../services/api';
 import TaskCard from '../../components/TaskCard';
 
 const BRAND = {
@@ -39,6 +42,10 @@ export default function CalendarScreen() {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
   const [events, setEvents] = useState([]);
+  const [localEntries, setLocalEntries] = useState([]);
+  const [user, setUser] = useState(null);
+  const [entryModal, setEntryModal] = useState(false);
+  const [entry, setEntry] = useState({ type: 'event', title: '', date: '', description: '', annually: true });
   const [filter, setFilter] = useState('Todas');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,12 +59,15 @@ export default function CalendarScreen() {
     description: item.descricao,
     done: item.statusAgenda === 'CONCLUIDO',
     statusAgenda: item.statusAgenda,
+    type: item.type || 'event',
   });
 
   const loadEvents = useCallback(async () => {
     try {
       const user = await authService.getCurrentUser();
+      setUser(user);
       if (user) {
+        setLocalEntries(await localDataService.get(localDataService.keyForUser('calendarEntries', user.id)));
         try {
           const data = await agendaService.findByUsuarioId(user.id);
           setEvents(data.map(mapAgendaToEvent));
@@ -120,19 +130,30 @@ export default function CalendarScreen() {
 
   const getEvents = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return events.filter((event) => event.date === dateStr);
+    return [...events, ...localEntries].filter((event) => event.date === dateStr || (event.type === 'birthday' && event.annually && event.date?.slice(5) === dateStr.slice(5)));
   };
 
   const isToday = (day) =>
     day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
-  const pendingCount = events.filter((event) => !event.done).length;
-  const completedCount = events.filter((event) => event.done).length;
-  const filteredTasks = events.filter((event) => {
+  const allEntries = [...events, ...localEntries];
+  const pendingCount = allEntries.filter((event) => !event.done).length;
+  const completedCount = allEntries.filter((event) => event.done).length;
+  const filteredTasks = allEntries.filter((event) => {
     if (filter === 'Pendentes') return !event.done;
     if (filter === 'Concluidas') return event.done;
     return true;
   });
+
+  const saveEntry = async () => {
+    if (!entry.title.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) return;
+    const nextEntry = { id: `local-${Date.now()}`, type: entry.type, title: entry.title.trim(), date: entry.date, description: entry.description.trim(), annually: entry.type === 'birthday' ? entry.annually : false, done: false, color: entry.type === 'birthday' ? '#D98A00' : BRAND.accent, time: '' };
+    const next = [nextEntry, ...localEntries];
+    setLocalEntries(next);
+    await localDataService.set(localDataService.keyForUser('calendarEntries', user?.id), next);
+    setEntryModal(false);
+    setEntry({ type: 'event', title: '', date: '', description: '', annually: true });
+  };
 
   if (loading) {
     return (
@@ -167,7 +188,7 @@ export default function CalendarScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statPill}>
             <Feather name="calendar" size={14} color={BRAND.accent} />
-            <Text style={styles.statPillText}>{events.length} eventos</Text>
+            <Text style={styles.statPillText}>{allEntries.length} compromissos</Text>
           </View>
           <View style={styles.statPill}>
             <Feather name="clock" size={14} color={BRAND.accent} />
@@ -220,7 +241,7 @@ export default function CalendarScreen() {
                         {dayEvents.slice(0, 2).map((event) => (
                           <View key={event.id} style={[styles.eventPreview, { borderLeftColor: event.color }]}>
                             <Text style={styles.eventPreviewText} numberOfLines={1}>
-                              {event.title}
+                              {event.type === 'birthday' ? '🎂 ' : ''}{event.title}
                             </Text>
                           </View>
                         ))}
@@ -270,9 +291,9 @@ export default function CalendarScreen() {
             filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
-                iconName={task.done ? 'check-circle' : 'calendar'}
+                iconName={task.done ? 'check-circle' : task.type === 'birthday' ? 'gift' : 'calendar'}
                 title={task.title}
-                subtitle={`Agenda - ${task.date.split('-').reverse().join('/')} ${task.time || ''}`}
+                subtitle={`${task.type === 'birthday' ? 'Aniversario' : 'Agenda'} - ${task.date.split('-').reverse().join('/')} ${task.type === 'birthday' && task.annually ? '· anual' : task.time || ''}`}
                 priority={task.done ? 'low' : 'medium'}
                 color={task.color}
               />
@@ -280,6 +301,21 @@ export default function CalendarScreen() {
           )}
         </View>
       </View>
+      <TouchableOpacity style={styles.addButton} activeOpacity={0.84} onPress={() => setEntryModal(true)}>
+        <Feather name="plus" size={20} color={COLORS.white} />
+        <Text style={styles.addButtonText}>Novo compromisso</Text>
+      </TouchableOpacity>
+      <Modal visible={entryModal} transparent animationType="slide" onRequestClose={() => setEntryModal(false)}>
+        <View style={styles.modalOverlay}><View style={styles.modal}>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>Novo compromisso</Text><TouchableOpacity onPress={() => setEntryModal(false)}><Feather name="x" size={22} color={BRAND.text}/></TouchableOpacity></View>
+          <View style={styles.typeRow}>{[['event','Evento'],['birthday','Aniversario']].map(([value,label]) => <TouchableOpacity key={value} onPress={() => setEntry({...entry,type:value})} style={[styles.typeButton,entry.type===value&&styles.typeActive]}><Text style={[styles.typeText,entry.type===value&&styles.typeTextActive]}>{value==='birthday'?'🎂 ':''}{label}</Text></TouchableOpacity>)}</View>
+          <TextInput value={entry.title} onChangeText={(title)=>setEntry({...entry,title})} placeholder={entry.type==='birthday'?'Nome da pessoa':'Titulo'} placeholderTextColor={BRAND.secondary} style={styles.entryInput}/>
+          <TextInput value={entry.date} onChangeText={(date)=>setEntry({...entry,date})} placeholder="Data (AAAA-MM-DD)" placeholderTextColor={BRAND.secondary} keyboardType="numbers-and-punctuation" style={styles.entryInput}/>
+          <TextInput value={entry.description} onChangeText={(description)=>setEntry({...entry,description})} placeholder="Informacoes adicionais (opcional)" placeholderTextColor={BRAND.secondary} multiline style={[styles.entryInput,styles.entryDescription]}/>
+          {entry.type==='birthday'&&<View style={styles.annualRow}><Text style={styles.annualText}>Repetir todos os anos</Text><Switch value={entry.annually} onValueChange={(annually)=>setEntry({...entry,annually})} trackColor={{true:BRAND.accent}}/></View>}
+          <TouchableOpacity style={styles.entrySave} onPress={saveEntry}><Text style={styles.entrySaveText}>Salvar</Text></TouchableOpacity>
+        </View></View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -548,4 +584,21 @@ const styles = StyleSheet.create({
     color: BRAND.secondary,
     fontWeight: '600',
   },
+  addButton: { marginHorizontal: SPACING.lg, minHeight: 48, borderRadius: 10, backgroundColor: BRAND.accent, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
+  addButtonText: { color: COLORS.white, fontSize: TYPOGRAPHY.body, fontWeight: '700' },
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(10,26,51,.35)' },
+  modal: { backgroundColor: BRAND.panel, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: SPACING.lg, paddingBottom: 36 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { color: BRAND.text, fontSize: 19, fontWeight: '700' },
+  typeRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  typeButton: { flex: 1, minHeight: 42, borderRadius: 9, borderWidth: 1, borderColor: BRAND.lineStrong, alignItems: 'center', justifyContent: 'center' },
+  typeActive: { backgroundColor: BRAND.accentTint, borderColor: BRAND.accent },
+  typeText: { color: BRAND.secondary, fontSize: 13, fontWeight: '700' },
+  typeTextActive: { color: BRAND.accent },
+  entryInput: { borderWidth: 1, borderColor: BRAND.line, borderRadius: 10, paddingHorizontal: 13, paddingVertical: 11, color: BRAND.text, fontSize: 15, marginBottom: 11 },
+  entryDescription: { minHeight: 70, textAlignVertical: 'top' },
+  annualRow: { minHeight: 42, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  annualText: { color: BRAND.text, fontSize: 14, fontWeight: '600' },
+  entrySave: { minHeight: 48, borderRadius: 10, backgroundColor: BRAND.accent, alignItems: 'center', justifyContent: 'center' },
+  entrySaveText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
 });

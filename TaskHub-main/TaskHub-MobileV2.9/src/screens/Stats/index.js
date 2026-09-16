@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { authService, agendaService } from '../../services/api';
@@ -58,19 +59,58 @@ const STAT_CARDS = [
 ];
 
 const WEEK_DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'];
+const PERIODS = { month: 'Mensal', week: 'Semanal', year: 'Anual' };
 
 function formatDate(date) {
   if (!date) return 'Sem data';
   return date.split('-').reverse().join('/');
 }
 
+function getDateFromAgenda(value) {
+  const date = new Date(`${String(value || '').slice(0, 10)}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isCompleted(item) {
+  return String(item.statusAgenda || '').toUpperCase() === 'CONCLUIDO';
+}
+
+function getStartOfWeek(date) {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = start.getDay();
+  start.setDate(start.getDate() - (day === 0 ? 6 : day - 1));
+  return start;
+}
+
+function getPeriodActivities(items, period, referenceDate = new Date()) {
+  const startOfWeek = getStartOfWeek(referenceDate);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+  return items.filter((item) => {
+    const date = getDateFromAgenda(item.dataAgenda);
+    if (!date) return false;
+    if (period === 'week') return date >= startOfWeek && date < endOfWeek;
+    if (period === 'year') return date.getFullYear() === referenceDate.getFullYear();
+    return date.getFullYear() === referenceDate.getFullYear()
+      && date.getMonth() === referenceDate.getMonth();
+  });
+}
+
+function getPeriodStats(items) {
+  const total = items.length;
+  const completed = items.filter(isCompleted).length;
+  const pending = total - completed;
+  const progress = total ? Math.round((completed / total) * 100) : 0;
+  return { total, completed, pending, progress };
+}
+
 function getWeeklyData(items) {
   const counts = WEEK_DAYS.map((day) => ({ day, value: 0 }));
 
   items.forEach((item) => {
-    if (!item.dataAgenda) return;
-    const date = new Date(`${item.dataAgenda}T00:00:00`);
-    if (Number.isNaN(date.getTime())) return;
+    const date = getDateFromAgenda(item.dataAgenda);
+    if (!date) return;
     const index = (date.getDay() + 6) % 7;
     counts[index].value += 1;
   });
@@ -84,6 +124,7 @@ function getWeeklyData(items) {
 
 export default function StatsScreen() {
   const tabBarPadding = useTabBarPadding();
+  const [period, setPeriod] = useState('month');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
@@ -101,10 +142,9 @@ export default function StatsScreen() {
       const user = await authService.getCurrentUser();
       if (user) {
         const data = await agendaService.findByUsuarioId(user.id);
-        const total = data.length;
-        const completed = data.filter((event) => event.statusAgenda === 'CONCLUIDO').length;
-        const pending = total - completed;
-        const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const periodActivities = getPeriodActivities(data, period);
+        const { total, completed, pending, progress } = getPeriodStats(periodActivities);
+        const weekActivities = getPeriodActivities(data, 'week');
 
         setStats({
           total,
@@ -113,7 +153,7 @@ export default function StatsScreen() {
           progress,
           efficiency: `${progress}%`,
           recent: data.slice(-4).reverse(),
-          weeklyData: getWeeklyData(data),
+          weeklyData: getWeeklyData(weekActivities),
         });
       }
     } catch (error) {
@@ -122,11 +162,17 @@ export default function StatsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [period]);
 
   useEffect(() => {
     loadStats();
   }, [loadStats]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [loadStats]),
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -167,9 +213,23 @@ export default function StatsScreen() {
       </View>
 
       <View style={styles.content}>
+        <View style={styles.periodFilters}>
+          {Object.entries(PERIODS).map(([key, label]) => (
+            <TouchableOpacity
+              key={key}
+              style={[styles.periodFilter, period === key && styles.periodFilterActive]}
+              onPress={() => setPeriod(key)}
+              activeOpacity={0.84}
+            >
+              <Text style={[styles.periodFilterText, period === key && styles.periodFilterTextActive]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <View style={styles.heroProgressCard}>
           <View>
-            <Text style={styles.progressCaption}>Conclusão total</Text>
+            <Text style={styles.progressCaption}>Conclusão {PERIODS[period].toLowerCase()}</Text>
             <Text style={styles.progressValue}>{stats.efficiency}</Text>
           </View>
           <View style={styles.progressRing}>
@@ -198,7 +258,7 @@ export default function StatsScreen() {
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.cardTitle}>Distribuição semanal</Text>
-              <Text style={styles.cardSubtitle}>Tarefas agrupadas por dia da semana</Text>
+              <Text style={styles.cardSubtitle}>Atividades desta semana agrupadas por dia</Text>
             </View>
             <View style={styles.cardIcon}>
               <Feather name="activity" size={18} color={BRAND.accent} />
@@ -388,6 +448,32 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.xl,
+  },
+  periodFilters: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: SPACING.lg,
+  },
+  periodFilter: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: BRAND.panel,
+    borderWidth: 1,
+    borderColor: BRAND.lineStrong,
+  },
+  periodFilterActive: {
+    backgroundColor: BRAND.lightPanel,
+    borderColor: BRAND.accent,
+  },
+  periodFilterText: {
+    fontSize: TYPOGRAPHY.small,
+    fontWeight: '600',
+    color: BRAND.secondary,
+  },
+  periodFilterTextActive: {
+    color: BRAND.accent,
   },
   statsGrid: {
     flexDirection: 'row',

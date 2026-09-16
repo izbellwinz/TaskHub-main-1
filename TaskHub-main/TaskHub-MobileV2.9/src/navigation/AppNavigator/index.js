@@ -12,6 +12,8 @@ import DashboardScreen from '../../screens/Home';
 import CalendarScreen from '../../screens/Calendar';
 import StatsScreen from '../../screens/Stats';
 import ProfileScreen from '../../screens/Profile';
+import NotesScreen from '../../screens/Notes';
+import SavedScreen from '../../screens/Saved';
 import SidebarContent from '../../components/Sidebar';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../styles/theme';
@@ -24,6 +26,7 @@ const TAB_ICONS = {
   [ROUTES.DASHBOARD]: 'home',
   [ROUTES.CALENDAR]: 'calendar',
   [ROUTES.STATS]: 'bar-chart-2',
+  [ROUTES.NOTES]: 'file-text',
 };
 
 function TabNavigator() {
@@ -62,6 +65,7 @@ function TabNavigator() {
       <Tab.Screen name={ROUTES.DASHBOARD} component={DashboardScreen} options={{ title: 'Home' }} />
       <Tab.Screen name={ROUTES.CALENDAR} component={CalendarScreen} options={{ title: 'Calendar' }} />
       <Tab.Screen name={ROUTES.STATS} component={StatsScreen} options={{ title: 'Stats' }} />
+      <Tab.Screen name={ROUTES.NOTES} component={NotesScreen} options={{ title: 'Notas' }} />
     </Tab.Navigator>
   );
 }
@@ -97,6 +101,7 @@ export default function AppNavigator() {
         {/* <Stack.Screen name={ROUTES.REGISTER} component={RegisterScreen} /> */}
         <Stack.Screen name="App" component={DrawerNavigator} />
         <Stack.Screen name={ROUTES.PROFILE} component={ProfileScreen} />
+        <Stack.Screen name={ROUTES.SAVED} component={SavedScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -26,10 +26,8 @@ const BRAND = {
 
 const SUPPORT_ITEMS = [
   { icon: 'user', label: 'Meu Perfil', route: ROUTES.PROFILE },
-  { icon: 'bell', label: 'Notificacoes' },
-  { icon: 'star', label: 'Favoritos' },
-  { icon: 'settings', label: 'Configuracoes' },
-  { icon: 'info', label: 'Sobre' },
+  { icon: 'bookmark', label: 'Salvos', route: ROUTES.SAVED },
+  { icon: 'settings', label: 'Configuracoes', route: ROUTES.PROFILE },
 ];
 
 function getInitials(name) {

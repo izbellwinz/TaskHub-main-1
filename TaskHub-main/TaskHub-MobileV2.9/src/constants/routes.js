@@ -5,5 +5,7 @@ export const ROUTES = {
   DASHBOARD: 'Dashboard',
   CALENDAR: 'Calendar',
   STATS: 'Stats',
+  NOTES: 'Notes',
+  SAVED: 'Saved',
   PROFILE: 'Profile',
 };

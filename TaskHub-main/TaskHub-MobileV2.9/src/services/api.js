@@ -28,6 +28,22 @@ const storage = {
   },
 };
 
+// Dados locais que pertencem ao usuário logado. Mantém o mesmo mecanismo de
+// armazenamento seguro já utilizado pela sessão, inclusive no web.
+export const localDataService = {
+  get: async (key, fallback = []) => {
+    const value = await storage.getItem(key);
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  },
+  set: async (key, value) => storage.setItem(key, JSON.stringify(value)),
+  keyForUser: (namespace, userId) => `${namespace}:${userId || 'anonymous'}`,
+};
+
 const getUserForStorage = (user) => {
   if (!user || Platform.OS === 'web') {
     return user;

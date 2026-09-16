@@ -37,24 +37,18 @@ const STATS = [
 
 const MENU = [
   {
-    icon: 'bell',
-    label: 'Notificacoes',
-    action: () => Alert.alert('Notificacoes', 'Nenhuma notificacao nova.'),
-  },
-  {
-    icon: 'star',
-    label: 'Favoritos',
-    action: () => Alert.alert('Favoritos', 'Voce ainda nao possui itens favoritos.'),
+    icon: 'bookmark',
+    label: 'Salvos',
+    action: (navigation) => navigation.navigate(ROUTES.SAVED),
   },
   {
     icon: 'settings',
     label: 'Configuracoes',
-    action: () => Alert.alert('Configuracoes', 'Configuracoes do aplicativo em breve.'),
-  },
-  {
-    icon: 'info',
-    label: 'Sobre o app',
-    action: () => Alert.alert('Sobre', 'TaskHub v2.9\nGerencie suas tarefas de forma simples.'),
+    action: () => Alert.alert('Configuracoes', 'Escolha uma opcao.', [
+      { text: 'Notificacoes', onPress: () => Alert.alert('Notificacoes', 'Nenhuma notificacao nova.') },
+      { text: 'Sobre', onPress: () => Alert.alert('Sobre', 'TaskHub v2.9\nGerencie suas tarefas de forma simples.') },
+      { text: 'Cancelar', style: 'cancel' },
+    ]),
   },
 ];
 
@@ -144,21 +138,26 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const handleChangePhoto = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const handleChangePhoto = async (source = 'library') => {
+    const permission = source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permissao necessaria', 'Permita acesso as fotos para alterar sua foto de perfil.');
+      Alert.alert('Permissao necessaria', source === 'camera' ? 'Permita o uso da camera para tirar sua foto de perfil.' : 'Permita acesso as fotos para alterar sua foto de perfil.');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
+    const pickerOptions = {
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.75,
       base64: true,
-    });
+    };
+    const result = source === 'camera'
+      ? await ImagePicker.launchCameraAsync(pickerOptions)
+      : await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
     if (result.canceled) return;
 
@@ -188,12 +187,14 @@ export default function ProfileScreen({ navigation }) {
   const handlePhotoOptions = () => {
     const options = profilePhoto
       ? [
-          { text: 'Trocar foto', onPress: handleChangePhoto },
+          { text: 'Galeria', onPress: () => handleChangePhoto('library') },
+          { text: 'Camera', onPress: () => handleChangePhoto('camera') },
           { text: 'Remover foto', style: 'destructive', onPress: handleRemovePhoto },
           { text: 'Cancelar', style: 'cancel' },
         ]
       : [
-          { text: 'Colocar foto', onPress: handleChangePhoto },
+          { text: 'Galeria', onPress: () => handleChangePhoto('library') },
+          { text: 'Camera', onPress: () => handleChangePhoto('camera') },
           { text: 'Cancelar', style: 'cancel' },
         ];
 
@@ -286,7 +287,7 @@ export default function ProfileScreen({ navigation }) {
               key={item.label}
               activeOpacity={0.84}
               style={[styles.menuItem, index < MENU.length - 1 && styles.menuBorder]}
-              onPress={item.action}
+              onPress={() => item.action(navigation)}
             >
               <View style={styles.menuIconBox}>
                 <Feather name={item.icon} size={18} color={BRAND.accent} />
