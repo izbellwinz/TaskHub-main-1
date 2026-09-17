@@ -25,8 +25,6 @@ const BRAND = {
   secondary: '#5C6B89',
   line: 'rgba(10, 26, 51, 0.10)',
   lineStrong: 'rgba(10, 26, 51, 0.18)',
-  danger: '#C0392B',
-  dangerTint: '#FDECEA',
 };
 
 const STATS = [
@@ -40,15 +38,6 @@ const MENU = [
     icon: 'bookmark',
     label: 'Salvos',
     action: (navigation) => navigation.navigate(ROUTES.SAVED),
-  },
-  {
-    icon: 'settings',
-    label: 'Configuracoes',
-    action: () => Alert.alert('Configuracoes', 'Escolha uma opcao.', [
-      { text: 'Notificacoes', onPress: () => Alert.alert('Notificacoes', 'Nenhuma notificacao nova.') },
-      { text: 'Sobre', onPress: () => Alert.alert('Sobre', 'TaskHub v2.9\nGerencie suas tarefas de forma simples.') },
-      { text: 'Cancelar', style: 'cancel' },
-    ]),
   },
 ];
 
@@ -92,32 +81,16 @@ export default function ProfileScreen({ navigation }) {
   const userEmail = user?.email || user?.username || 'E-mail nao disponivel';
   const profilePhoto = user?.foto || null;
 
-  const handleGoHome = () => {
+  const handleLeaveProfile = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
     navigation.navigate('App', {
       screen: 'MainTabs',
       params: { screen: ROUTES.DASHBOARD },
     });
-  };
-
-  const handleLogout = async () => {
-    Alert.alert(
-      'Sair',
-      'Deseja realmente sair da sua conta?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            await authService.logout();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: ROUTES.LOGIN }],
-            });
-          },
-        },
-      ]
-    );
   };
 
   const saveProfilePhoto = async (foto) => {
@@ -214,7 +187,7 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity
             activeOpacity={0.84}
             style={styles.homeButton}
-            onPress={handleGoHome}
+            onPress={handleLeaveProfile}
           >
             <Feather name="arrow-left" size={19} color={BRAND.text} />
           </TouchableOpacity>
@@ -251,7 +224,7 @@ export default function ProfileScreen({ navigation }) {
             onPress={handlePhotoOptions}
             disabled={savingPhoto}
           >
-            <Text style={styles.photoActionText}>{profilePhoto ? 'Trocar foto' : 'Colocar foto'}</Text>
+            <Text style={styles.photoActionText}>{profilePhoto ? 'Editar foto' : 'Adicionar foto'}</Text>
           </TouchableOpacity>
 
           <View style={styles.memberBadge}>
@@ -298,16 +271,6 @@ export default function ProfileScreen({ navigation }) {
           ))}
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.84}
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-        >
-          <View style={styles.logoutIconBox}>
-            <Feather name="log-out" size={18} color={BRAND.danger} />
-          </View>
-          <Text style={styles.logoutText}>Sair da conta</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -532,30 +495,5 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.body,
     fontWeight: '500',
     color: BRAND.text,
-  },
-  logoutBtn: {
-    minHeight: 54,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: BRAND.panel,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(192, 57, 43, 0.22)',
-    paddingHorizontal: SPACING.md,
-  },
-  logoutIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: BRAND.dangerTint,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-  logoutText: {
-    fontSize: TYPOGRAPHY.body,
-    fontWeight: '600',
-    color: BRAND.danger,
   },
 });

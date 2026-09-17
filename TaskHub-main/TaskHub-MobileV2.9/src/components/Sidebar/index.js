@@ -20,14 +20,12 @@ const BRAND = {
   secondary: '#5c6b89',
   line: 'rgba(10, 26, 51, 0.10)',
   white: '#ffffff',
-  danger: '#ef4444',
-  dangerSoft: '#fee2e2',
 };
 
 const SUPPORT_ITEMS = [
   { icon: 'user', label: 'Meu Perfil', route: ROUTES.PROFILE },
   { icon: 'bookmark', label: 'Salvos', route: ROUTES.SAVED },
-  { icon: 'settings', label: 'Configuracoes', route: ROUTES.PROFILE },
+  { icon: 'settings', label: 'Configuracoes', route: ROUTES.SETTINGS },
 ];
 
 function getInitials(name) {
@@ -68,12 +66,6 @@ export default function SidebarContent({ navigation }) {
   const userName = user?.nome || user?.name || 'Usuario';
   const userEmail = user?.email || user?.username || 'E-mail nao disponivel';
   const profilePhoto = user?.foto || null;
-
-  const handleLogout = async () => {
-    await authService.logout();
-    navigation.closeDrawer();
-    navigation.navigate(ROUTES.LOGIN);
-  };
 
   const handleShortcutPress = (item) => {
     navigation.closeDrawer();
@@ -126,16 +118,6 @@ export default function SidebarContent({ navigation }) {
         </View>
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.82}
-        style={styles.logoutItem}
-        onPress={handleLogout}
-      >
-        <View style={styles.logoutIconBox}>
-          <Feather name="log-out" size={18} color={BRAND.danger} />
-        </View>
-        <Text style={styles.logoutLabel}>Sair</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -257,31 +239,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: BRAND.secondary,
     fontWeight: '600',
-  },
-  logoutItem: {
-    minHeight: 54,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: BRAND.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: BRAND.dangerSoft,
-    paddingHorizontal: SPACING.md,
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  logoutIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 9,
-    backgroundColor: BRAND.dangerSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-  logoutLabel: {
-    fontSize: TYPOGRAPHY.body,
-    color: BRAND.danger,
-    fontWeight: '700',
   },
 });

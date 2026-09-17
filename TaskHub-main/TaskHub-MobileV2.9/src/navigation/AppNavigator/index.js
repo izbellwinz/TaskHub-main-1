@@ -14,6 +14,7 @@ import StatsScreen from '../../screens/Stats';
 import ProfileScreen from '../../screens/Profile';
 import NotesScreen from '../../screens/Notes';
 import SavedScreen from '../../screens/Saved';
+import SettingsScreen from '../../screens/Settings';
 import SidebarContent from '../../components/Sidebar';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../styles/theme';
@@ -102,6 +103,7 @@ export default function AppNavigator() {
         <Stack.Screen name="App" component={DrawerNavigator} />
         <Stack.Screen name={ROUTES.PROFILE} component={ProfileScreen} />
         <Stack.Screen name={ROUTES.SAVED} component={SavedScreen} />
+        <Stack.Screen name={ROUTES.SETTINGS} component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

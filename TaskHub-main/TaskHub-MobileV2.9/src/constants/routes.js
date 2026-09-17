@@ -8,4 +8,5 @@ export const ROUTES = {
   NOTES: 'Notes',
   SAVED: 'Saved',
   PROFILE: 'Profile',
+  SETTINGS: 'Settings',
 };

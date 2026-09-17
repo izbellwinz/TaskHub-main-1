@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { authService, agendaService } from '../../services/api';
+import { ROUTES } from '../../constants/routes';
 
 const BRAND = {
   midnight: '#0a1a33',
@@ -122,7 +123,7 @@ function getWeeklyData(items) {
   }));
 }
 
-export default function StatsScreen() {
+export default function StatsScreen({ navigation }) {
   const tabBarPadding = useTabBarPadding();
   const [period, setPeriod] = useState('month');
   const [loading, setLoading] = useState(true);
@@ -198,6 +199,9 @@ export default function StatsScreen() {
     >
       <View style={styles.hero}>
         <View style={styles.heroTop}>
+          <TouchableOpacity onPress={() => navigation.navigate('App', { screen: 'MainTabs', params: { screen: ROUTES.DASHBOARD } })} style={styles.homeButton} activeOpacity={0.82}>
+            <Feather name="arrow-left" size={19} color={BRAND.text} />
+          </TouchableOpacity>
           <View>
             <Text style={styles.eyebrow}>TaskHub</Text>
             <Text style={styles.heroTitle}>Estatísticas</Text>
@@ -371,6 +375,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  heroTitleBlock: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  homeButton: { width: 40, height: 40, borderRadius: 8, backgroundColor: BRAND.panel, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: BRAND.lineStrong },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 0.6,

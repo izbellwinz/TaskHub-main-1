@@ -14,7 +14,8 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
-import { authService, agendaService, localDataService } from '../../services/api';
+import { authService, agendaService } from '../../services/api';
+import { ROUTES } from '../../constants/routes';
 import TaskCard from '../../components/TaskCard';
 
 const BRAND = {
@@ -36,7 +37,7 @@ const MONTH_NAMES = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 
 const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 const FILTERS = ['Todas', 'Pendentes', 'Concluidas'];
 
-export default function CalendarScreen() {
+export default function CalendarScreen({ navigation }) {
   const tabBarPadding = useTabBarPadding();
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth());
@@ -67,7 +68,6 @@ export default function CalendarScreen() {
       const user = await authService.getCurrentUser();
       setUser(user);
       if (user) {
-        setLocalEntries(await localDataService.get(localDataService.keyForUser('calendarEntries', user.id)));
         try {
           const data = await agendaService.findByUsuarioId(user.id);
           setEvents(data.map(mapAgendaToEvent));
@@ -130,13 +130,13 @@ export default function CalendarScreen() {
 
   const getEvents = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return [...events, ...localEntries].filter((event) => event.date === dateStr || (event.type === 'birthday' && event.annually && event.date?.slice(5) === dateStr.slice(5)));
+    return events.filter((event) => event.date === dateStr);
   };
 
   const isToday = (day) =>
     day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
-  const allEntries = [...events, ...localEntries];
+  const allEntries = events;
   const pendingCount = allEntries.filter((event) => !event.done).length;
   const completedCount = allEntries.filter((event) => event.done).length;
   const filteredTasks = allEntries.filter((event) => {
@@ -174,9 +174,14 @@ export default function CalendarScreen() {
     >
       <View style={styles.hero}>
         <View style={styles.heroTop}>
-          <View>
+          <View style={styles.heroTitleBlock}>
+            <TouchableOpacity onPress={() => navigation.navigate('App', { screen: 'MainTabs', params: { screen: ROUTES.DASHBOARD } })} style={styles.homeButton} activeOpacity={0.82}>
+              <Feather name="arrow-left" size={19} color={BRAND.text} />
+            </TouchableOpacity>
+            <View>
             <Text style={styles.eyebrow}>TaskHub</Text>
             <Text style={styles.heroTitle}>{MONTH_NAMES[month]} {year}</Text>
+            </View>
           </View>
           <TouchableOpacity onPress={onRefresh} style={styles.refreshBtn} activeOpacity={0.82}>
             <Feather name="refresh-cw" size={18} color={BRAND.text} />
@@ -301,10 +306,6 @@ export default function CalendarScreen() {
           )}
         </View>
       </View>
-      <TouchableOpacity style={styles.addButton} activeOpacity={0.84} onPress={() => setEntryModal(true)}>
-        <Feather name="plus" size={20} color={COLORS.white} />
-        <Text style={styles.addButtonText}>Novo compromisso</Text>
-      </TouchableOpacity>
       <Modal visible={entryModal} transparent animationType="slide" onRequestClose={() => setEntryModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modal}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>Novo compromisso</Text><TouchableOpacity onPress={() => setEntryModal(false)}><Feather name="x" size={22} color={BRAND.text}/></TouchableOpacity></View>
@@ -344,6 +345,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  heroTitleBlock: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  homeButton: { width: 40, height: 40, borderRadius: 8, backgroundColor: BRAND.panel, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: BRAND.lineStrong },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 0.6,
