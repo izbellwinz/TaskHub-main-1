@@ -18,6 +18,9 @@ public class AgendaService {
         destino.setAntecedenciaNotificacao(origem.getAntecedenciaNotificacao());
         destino.setGoogleEventId(origem.getGoogleEventId());
         destino.setSincronizadoGoogle(origem.getSincronizadoGoogle());
+        destino.setTipoCompromisso(origem.getTipoCompromisso());
+        destino.setRecorrenteAnual(origem.getRecorrenteAnual());
+        destino.setSalvarAnexo(origem.getSalvarAnexo());
     }
 
     // Método responsável em listar todas as Agendas cadastradas no banco de dados
@@ -35,7 +38,23 @@ public class AgendaService {
         agenda.setNotificar(agenda.getNotificar());
         agenda.setAntecedenciaNotificacao(agenda.getAntecedenciaNotificacao());
         agenda.setSincronizadoGoogle(agenda.getSincronizadoGoogle());
+        agenda.setTipoCompromisso(agenda.getTipoCompromisso());
+        agenda.setRecorrenteAnual(agenda.getRecorrenteAnual());
+        agenda.setSalvarAnexo(agenda.getSalvarAnexo());
+        normalizarTipoCompromisso(agenda);
         return agendaRepository.save(agenda);
+    }
+
+    private void normalizarTipoCompromisso(Agenda agenda) {
+        String tipo = agenda.getTipoCompromisso();
+        if (!"EVENTO".equals(tipo) && !"TAREFA".equals(tipo) && !"ANIVERSARIO".equals(tipo)) {
+            agenda.setTipoCompromisso("EVENTO");
+        }
+        agenda.setRecorrenteAnual("ANIVERSARIO".equals(agenda.getTipoCompromisso()));
+        if ("TAREFA".equals(agenda.getTipoCompromisso())) {
+            String status = agenda.getStatusAgenda();
+            agenda.setStatusAgenda("CONCLUIDO".equalsIgnoreCase(status) ? "CONCLUIDO" : "PENDENTE");
+        }
     }
 
     // Método responsável em listar a Agenda por ID

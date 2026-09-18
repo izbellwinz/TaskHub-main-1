@@ -53,6 +53,15 @@ public class Agenda {
     @Column(name = "sincronizadoGoogle", nullable = false)
     private Boolean sincronizadoGoogle = false;
 
+    @Column(name = "tipoCompromisso", length = 20, nullable = false)
+    private String tipoCompromisso = "EVENTO";
+
+    @Column(name = "recorrenteAnual", nullable = false)
+    private Boolean recorrenteAnual = false;
+
+    @Column(name = "salvarAnexo", nullable = false)
+    private Boolean salvarAnexo = false;
+
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
@@ -176,4 +185,14 @@ public class Agenda {
     public void setSincronizadoGoogle(Boolean sincronizadoGoogle) {
         this.sincronizadoGoogle = sincronizadoGoogle != null ? sincronizadoGoogle : false;
     }
+
+    public String getTipoCompromisso() { return tipoCompromisso; }
+    public void setTipoCompromisso(String tipoCompromisso) {
+        this.tipoCompromisso = tipoCompromisso == null || tipoCompromisso.isBlank()
+                ? "EVENTO" : tipoCompromisso.toUpperCase();
+    }
+    public Boolean getRecorrenteAnual() { return recorrenteAnual; }
+    public void setRecorrenteAnual(Boolean recorrenteAnual) { this.recorrenteAnual = recorrenteAnual != null && recorrenteAnual; }
+    public Boolean getSalvarAnexo() { return salvarAnexo; }
+    public void setSalvarAnexo(Boolean salvarAnexo) { this.salvarAnexo = salvarAnexo != null && salvarAnexo; }
 }

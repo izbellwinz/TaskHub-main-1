@@ -27,6 +27,8 @@ const createEmptyEventForm = (date = '') => ({
   notificationMinutes: DEFAULT_NOTIFICATION_MINUTES,
   googleEventId: null,
   syncedGoogle: false,
+  type: 'EVENTO',
+  saveAttachment: false,
 });
 
 function Agenda({ darkTheme }) {
@@ -68,6 +70,8 @@ function Agenda({ darkTheme }) {
     notificationMinutes: clampNotificationMinutes(agenda.antecedenciaNotificacao),
     googleEventId: agenda.googleEventId || null,
     syncedGoogle: Boolean(agenda.sincronizadoGoogle),
+    type: agenda.tipoCompromisso || 'EVENTO',
+    saveAttachment: Boolean(agenda.salvarAnexo),
   });
 
   const buildChecklistPayload = (agendaId, item) => ({
@@ -164,6 +168,9 @@ function Agenda({ darkTheme }) {
         arquivo: eventForm.image ? eventForm.image.split(',')[1] : null,
         notificar: Boolean(eventForm.notify),
         antecedenciaNotificacao: clampNotificationMinutes(eventForm.notificationMinutes),
+        tipoCompromisso: eventForm.type || 'EVENTO',
+        recorrenteAnual: eventForm.type === 'ANIVERSARIO',
+        salvarAnexo: Boolean(eventForm.saveAttachment && eventForm.image),
 
       };
 
@@ -272,6 +279,9 @@ function Agenda({ darkTheme }) {
         antecedenciaNotificacao: clampNotificationMinutes(eventToUpdate.notificationMinutes),
         googleEventId: eventToUpdate.googleEventId || null,
         sincronizadoGoogle: Boolean(eventToUpdate.syncedGoogle),
+        tipoCompromisso: eventToUpdate.type || 'EVENTO',
+        recorrenteAnual: eventToUpdate.type === 'ANIVERSARIO',
+        salvarAnexo: Boolean(eventToUpdate.saveAttachment && eventToUpdate.image),
       };
 
       AgendaService.update(eventId, data)
@@ -370,7 +380,11 @@ function Agenda({ darkTheme }) {
     return `${year}-${month}-${day}`;
   };
 
-  const getEventsForDay = (dayObj) => events.filter(e => e.date === formatDate(dayObj));
+  const getEventsForDay = (dayObj) => {
+    const date = formatDate(dayObj);
+    const [, month, day] = date.split('-');
+    return events.filter((event) => event.date === date || (event.type === 'ANIVERSARIO' && event.date?.slice(5) === `${month}-${day}`));
+  };
 
   const handleDayClick = (dayObj) => {
     if (dayObj?.day) {
@@ -506,6 +520,14 @@ function Agenda({ darkTheme }) {
                 </div>
               </div>
               <div className="event-color-row">
+                <span className="event-section-label">Tipo</span>
+                <div className="event-type-options">
+                  {[['ANIVERSARIO', '🎂 Aniversário'], ['TAREFA', '✅ Tarefa'], ['EVENTO', '📌 Evento']].map(([type, label]) => (
+                    <button key={type} type="button" className={`event-type-btn ${eventForm.type === type ? 'selected' : ''}`} onClick={() => setEventForm({ ...eventForm, type })}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="event-color-row">
                 <span className="event-section-label">Cor</span>
                 <div className="event-color-dots">
                   {Object.values(eventColors).map((color) => (
@@ -587,6 +609,12 @@ function Agenda({ darkTheme }) {
                       </div>
                     </div>
                   )}
+                  {eventForm.image && (
+                    <label className="save-attachment-row">
+                      <input type="checkbox" checked={eventForm.saveAttachment} onChange={(e) => setEventForm({ ...eventForm, saveAttachment: e.target.checked })} />
+                      <span>Salvar nos Salvos</span>
+                    </label>
+                  )}
                 </div>
               </div>
             </div>
@@ -616,6 +644,10 @@ function Agenda({ darkTheme }) {
                   <span className="detail-value">{selectedEvent.date.split('-').reverse().join('/')}</span>
                 </div>
               )}
+              <div className="detail-item left-aligned">
+                <span className="detail-label">Tipo:</span>
+                <span className="detail-value">{selectedEvent.type === 'ANIVERSARIO' ? 'Aniversário anual' : selectedEvent.type === 'TAREFA' ? 'Tarefa' : 'Evento'}</span>
+              </div>
               {selectedEvent.time && (
                 <div className="detail-item left-aligned">
                   <span className="detail-label">Horário:</span>

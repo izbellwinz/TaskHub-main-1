@@ -79,6 +79,9 @@ public class AgendaController {
             agendaExistente.setAntecedenciaNotificacao(agenda.getAntecedenciaNotificacao());
             agendaExistente.setGoogleEventId(agenda.getGoogleEventId());
             agendaExistente.setSincronizadoGoogle(agenda.getSincronizadoGoogle());
+            agendaExistente.setTipoCompromisso(agenda.getTipoCompromisso());
+            agendaExistente.setRecorrenteAnual(agenda.getRecorrenteAnual());
+            agendaExistente.setSalvarAnexo(agenda.getSalvarAnexo());
 
             Agenda agendaAtualizada = agendaService.save(agendaExistente);
             return ResponseEntity.ok(agendaAtualizada);

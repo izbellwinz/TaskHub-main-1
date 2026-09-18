@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { authService, localDataService } from '../../services/api';
+import { authService, localDataService, noteService } from '../../services/api';
 import { SPACING, TYPOGRAPHY } from '../../styles/theme';
 import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 import { ROUTES } from '../../constants/routes';
@@ -24,7 +24,12 @@ export default function NotesScreen({ navigation }) {
     const currentUser = await authService.getCurrentUser();
     setUser(currentUser);
     if (currentUser) {
-      setNotes(await localDataService.get(localDataService.keyForUser('notes', currentUser.id)));
+      try {
+        const remoteNotes = await noteService.findByUsuarioId(currentUser.id);
+        setNotes(remoteNotes.map((note) => ({ ...note, title: note.titulo, content: note.conteudo || '', color: note.cor, important: note.importante, updatedAt: note.dataAtualizacao })));
+      } catch {
+        setNotes(await localDataService.get(localDataService.keyForUser('notes', currentUser.id)));
+      }
       const saved = await localDataService.get(localDataService.keyForUser('saved', currentUser.id));
       setSavedIds(saved.filter((item) => item.type === 'note').map((item) => item.sourceId));
     }

@@ -145,4 +145,11 @@ export const agendaService = {
   }
 };
 
+export const noteService = {
+  findByUsuarioId: async (usuarioId) => normalizeList((await api.get(`/notas/usuario/${usuarioId}`)).data),
+  create: async (data) => (await api.post('/notas', data)).data,
+  update: async (id, data) => (await api.put(`/notas/${id}`, data)).data,
+  remove: async (id) => (await api.delete(`/notas/${id}`)).data,
+};
+
 export default api;

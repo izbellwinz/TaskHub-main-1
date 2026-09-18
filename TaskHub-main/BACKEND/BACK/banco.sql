@@ -23,6 +23,7 @@ GO
 IF OBJECT_ID('Notificacao', 'U') IS NOT NULL DROP TABLE Notificacao;
 IF OBJECT_ID('Configuracao', 'U') IS NOT NULL DROP TABLE Configuracao;
 IF OBJECT_ID('Contato', 'U') IS NOT NULL DROP TABLE Contato;
+IF OBJECT_ID('Nota', 'U') IS NOT NULL DROP TABLE Nota;
 IF OBJECT_ID('Tarefa', 'U') IS NOT NULL DROP TABLE Tarefa;
 IF OBJECT_ID('Agenda', 'U') IS NOT NULL DROP TABLE Agenda;
 IF OBJECT_ID('Usuario', 'U') IS NOT NULL DROP TABLE Usuario;
@@ -45,6 +46,19 @@ CREATE TABLE Usuario
 );
 GO
 
+CREATE TABLE Nota
+(
+ id INT IDENTITY(1,1) PRIMARY KEY,
+ usuario_id INT NOT NULL,
+ titulo VARCHAR(120) NOT NULL,
+ conteudo VARCHAR(2000) NULL,
+ cor VARCHAR(20) NULL,
+ importante BIT NOT NULL DEFAULT 0,
+ dataAtualizacao SMALLDATETIME NOT NULL DEFAULT GETDATE(),
+ CONSTRAINT FK_Nota_Usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+);
+GO
+
 -- ==========================
 -- TABELA AGENDA
 -- ==========================
@@ -64,6 +78,9 @@ CREATE TABLE Agenda
 	 antecedenciaNotificacao INT NOT NULL DEFAULT 30,
 	 googleEventId VARCHAR(255) NULL,
 	 sincronizadoGoogle BIT NOT NULL DEFAULT 0,
+	 tipoCompromisso VARCHAR(20) NOT NULL DEFAULT 'EVENTO',
+	 recorrenteAnual BIT NOT NULL DEFAULT 0,
+	 salvarAnexo BIT NOT NULL DEFAULT 0,
 	
 	 CONSTRAINT FK_Agenda_Usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 	);

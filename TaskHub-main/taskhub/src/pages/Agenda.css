@@ -2636,6 +2636,12 @@
   transform: scale(1.15);
 }
 
+.agenda-container .event-type-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.agenda-container .event-type-btn { border: 1px solid var(--linha-forte); background: var(--branco); color: var(--texto-secundario); border-radius: 7px; padding: 7px 10px; font-size: 12px; font-weight: 500; cursor: pointer; }
+.agenda-container .event-type-btn.selected { background: var(--azul-acento-tinta); color: var(--azul-acento); border-color: var(--azul-acento); }
+.agenda-container .save-attachment-row { display: flex; align-items: center; gap: 8px; padding: 0 14px 12px; color: var(--texto-secundario); font-size: 12px; font-weight: 500; }
+.agenda-container .save-attachment-row input { accent-color: var(--azul-acento); }
+
 .agenda-container .event-color-dot.selected {
   border-color: var(--texto-primario);
 }
